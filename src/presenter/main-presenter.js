@@ -6,25 +6,28 @@ import Filters from '../view/filters-view.js';
 import Sorting from '../view/sorting-view.js';
 import { render } from '../render.js';
 
-const ROUTE_POINTS_COUNT = 3;
-
 export default class Presenter {
   RoutePointsListComponent = new RoutePointsList();
 
-  constructor() {
+  constructor({mainModel}) {
+    this.mainModel = mainModel;
     this.tripEvents = document.querySelector('.trip-events');
-    this.tripControlsFilters = document.querySelector('.trip-controls__filters');
+    this.tripControlFilters = document.querySelector('.trip-controls__filters');
   }
 
   init() {
-    render(new Filters(), this.tripControlsFilters);
+    this.points = this.mainModel.getPoints();
+    this.offers = this.mainModel.getOffers();
+    this.destinations = this.mainModel.getDestinations();
+
+    render(new Filters(), this.tripControlFilters);
     render(new Sorting(), this.tripEvents);
     render(this.RoutePointsListComponent, this.tripEvents);
-    render(new FormEditing(), this.RoutePointsListComponent.getElement());
+    render(new FormEditing({point: this.points[0], destinations: this.destinations}), this.RoutePointsListComponent.getElement());
 
-    for (let i = 0; i < ROUTE_POINTS_COUNT; i++) {
-      render(new RoutePoint(), this.RoutePointsListComponent.getElement());
-    }
+    this.points.forEach((point) => {
+      render(new RoutePoint({point, destinations: this.destinations}), this.RoutePointsListComponent.getElement());
+    });
 
     render(new FormCreation(), this.RoutePointsListComponent.getElement());
   }
