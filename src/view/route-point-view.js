@@ -1,26 +1,22 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view.js';
 import { formatDate, getDestinationById, getDuration, getOffersByType } from '../utils';
 import { Formats } from '../const';
 
-export default class RoutePoint {
-  constructor({point, destinations}) {
-    this.point = point;
-    this.destinations = destinations;
+export default class RoutePoint extends AbstractView {
+  #point = null;
+  #destinations = null;
+  constructor({point, destinations, onRollButtonClick}) {
+    super();
+    this.#point = point;
+    this.#destinations = destinations;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', (event) => {
+      event.preventDefault();
+      onRollButtonClick();
+    });
   }
 
-  getTemplate() {
-    return createRoutePointTemplate(this.point, this.destinations);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createRoutePointTemplate(this.#point, this.#destinations);
   }
 }
 
