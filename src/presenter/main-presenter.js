@@ -4,6 +4,8 @@ import RoutePointsList from '../view/route-points-list-view.js';
 import Filters from '../view/filters-view.js';
 import Sorting from '../view/sorting-view.js';
 import { render, replace } from '../framework/render.js';
+import NoPointsListView from '../view/no-points-view.js';
+import { generateFilter } from '../mock/filters-mock.js';
 
 export default class Presenter {
   #RoutePointListComponent = new RoutePointsList();
@@ -26,13 +28,19 @@ export default class Presenter {
     this.#offers = this.#mainModel.offers;
     this.#destinations = this.#mainModel.destinations;
 
-    render(new Filters(), this.#tripControlFilters);
-    render(new Sorting(), this.#tripEvents);
-    render(this.#RoutePointListComponent, this.#tripEvents);
+    const filters = generateFilter(this.#points);
 
-    this.#points.forEach((point) => {
-      this.#renderPoint(point);
-    });
+    if (this.#points.length > 0) {
+      render(new Filters({filters}), this.#tripControlFilters);
+      render(new Sorting(), this.#tripEvents);
+      render(this.#RoutePointListComponent, this.#tripEvents);
+
+      this.#points.forEach((point) => {
+        this.#renderPoint(point);
+      });
+    } else {
+      render(new NoPointsListView(), this.#tripEvents);
+    }
   }
 
   #renderPoint(point) {

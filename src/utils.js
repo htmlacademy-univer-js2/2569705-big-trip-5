@@ -38,4 +38,16 @@ function getDuration(dateFrom, dateTo){
   }
 }
 
-export {getRandomArrayElement, formatDate, getDestinationById, getOffersByType, getDuration};
+function isPointPresent(point) {
+  return dayjs().isAfter(dayjs(point.dateFrom)) && dayjs().isBefore(dayjs(point.dateTo));
+}
+
+function isPointFuture(point) {
+  return dayjs().isBefore(dayjs(point.dateFrom));
+}
+
+function isPointPast(point) {
+  return dayjs().isAfter(dayjs(point.dateTo));
+}
+
+export {getRandomArrayElement, formatDate, getDestinationById, getOffersByType, getDuration, isPointFuture, isPointPast, isPointPresent};
