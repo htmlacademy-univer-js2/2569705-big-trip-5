@@ -5,14 +5,32 @@ import { Formats } from '../const';
 export default class RoutePoint extends AbstractView {
   #point = null;
   #destinations = null;
-  constructor({point, destinations, onRollButtonClick}) {
+  constructor({ point, destinations, onEditButtonClick, onFavoriteButtonClick }) {
     super();
+
     this.#point = point;
     this.#destinations = destinations;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', (event) => {
-      event.preventDefault();
-      onRollButtonClick();
-    });
+
+    this.#addEventListeners(onEditButtonClick, onFavoriteButtonClick);
+  }
+
+  #addEventListeners(onEditButtonClick, onFavoriteButtonClick) {
+    const rollupButton = this.element.querySelector('.event__rollup-btn');
+    const favoriteButton = this.element.querySelector('.event__favorite-btn');
+
+    if (rollupButton) {
+      rollupButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        onEditButtonClick();
+      });
+    }
+
+    if (favoriteButton) {
+      favoriteButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        onFavoriteButtonClick();
+      });
+    }
   }
 
   get template() {
