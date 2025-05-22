@@ -48,7 +48,7 @@ function createRoutePointTemplate(point, destinations) {
   const timeEnd = formatDate(dateTo, Formats.TIME);
 
   const destinationById = getDestinationById(destination, destinations);
-  const duration = getDuration(dateFrom, dateTo);
+  const duration = getDuration(dateFrom, dateTo, 'string');
 
   const offers = getOffersByType(point);
   const selectedOffers = offers

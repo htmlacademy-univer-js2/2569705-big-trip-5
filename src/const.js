@@ -21,4 +21,6 @@ const filter = {
   [FilterType.PAST]: (points) => points.filter((point) => isPointPast(point))
 };
 
-export { Formats, filter };
+const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
+
+export { Formats, filter, SortTypes };

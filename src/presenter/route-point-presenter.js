@@ -24,6 +24,11 @@ export default class RoutePointPresenter {
     this.#onModeSwitch = modeSwitchHandler;
   }
 
+  clearElements(){
+    remove(this.#pointView);
+    remove(this.#editFormView);
+  }
+
   init(point) {
     const prevPointView = this.#pointView;
     const prevEditForm = this.#editFormView;
