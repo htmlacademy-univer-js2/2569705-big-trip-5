@@ -5,13 +5,13 @@ import { Formats } from '../const.js';
 export default class FormEditing extends AbstractView{
   #point = null;
   #destinations = null;
-  constructor({point, destinations, onRollButtonClick, onSubmitClick}) {
+  constructor({point, destinations, onCancelButtonClick, onSubmitClick}) {
     super();
     this.#point = point;
     this.#destinations = destinations;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', (event) => {
       event.preventDefault();
-      onRollButtonClick();
+      onCancelButtonClick();
     });
     this.element.querySelector('.event__save-btn').addEventListener('submit', onSubmitClick);
   }
