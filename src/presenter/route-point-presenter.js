@@ -53,6 +53,7 @@ export default class RoutePointPresenter {
 
   resetView() {
     if (this.#currentMode !== 'VIEW') {
+      this.#editFormView.reset(this.#dataPoint);
       this.#switchToViewMode();
     }
   }
@@ -77,6 +78,7 @@ export default class RoutePointPresenter {
   #handleEscapeKey = (event) => {
     if (event.key === 'Escape') {
       event.preventDefault();
+      this.#editFormView.reset(this.#dataPoint);
       this.#switchToViewMode();
       document.removeEventListener('keydown', this.#handleEscapeKey);
     }
@@ -102,9 +104,14 @@ export default class RoutePointPresenter {
     });
   }
 
-  #handleFormAction(action) {
-    if (['submit', 'cancel'].includes(action)) {
-      this.#switchToViewMode();
+  #handleFormAction = (action) => {
+    if (action === 'submit') {
+      this.#onFavoriteToggle(this.#dataPoint);
+    } else if (action === 'cancel') {
+      this.#editFormView.reset(this.#dataPoint);
     }
-  }
+
+    this.#switchToViewMode();
+    document.removeEventListener('keydown', this.#handleEscapeKey);
+  };
 }
