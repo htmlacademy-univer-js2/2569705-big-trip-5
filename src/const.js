@@ -22,5 +22,6 @@ const filter = {
 };
 
 const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
+const EventTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
-export { Formats, filter, SortTypes };
+export { Formats, filter, SortTypes, EventTypes };
