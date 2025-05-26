@@ -39,7 +39,6 @@ export default class RoutePoint extends AbstractView {
 }
 
 function createRoutePointTemplate(point, destinations) {
-
   const {basePrice, dateFrom, dateTo, destination, isFavorite, type} = point;
 
   const dayValue = formatDate(dateFrom, Formats.TIME_TAG_VALUE);
