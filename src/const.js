@@ -1,4 +1,4 @@
-import { isPointFuture, isPointPast, isPointPresent } from './utils';
+import { isPointFuture, isPointPast, isPointPresent, getOffersByType } from './utils';
 
 const Formats = {
   TIME: 'HH:mm',
@@ -24,4 +24,36 @@ const filter = {
 const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
 const EventTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
-export { Formats, filter, SortTypes, EventTypes };
+const NEW_POINT = {
+  id: crypto.randomUUID(),
+  type: 'flight',
+  destination: '',
+  dateFrom: '',
+  dateTo: '',
+  basePrice: 0,
+  offers: getOffersByType({ type: 'flight' }),
+  isFavorite: false,
+};
+
+
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT'
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR'
+};
+
+const NoPointMessages = {
+  EVERYTHING: 'Click New Event to create your first point',
+  PAST: 'There are no past events now',
+  PRESENT: 'There are no present events now',
+  FUTURE: 'There are no future events now'
+};
+
+
+export { Formats, filter, SortTypes, EventTypes, NEW_POINT, UserAction, UpdateType, NoPointMessages, FilterType };

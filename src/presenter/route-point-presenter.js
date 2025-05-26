@@ -1,6 +1,7 @@
 import RoutePoint from '../view/route-point-view.js';
 import FormEditing from '../view/editing-form-view.js';
 import { render, replace, remove } from '../framework/render.js';
+import { UserAction, UpdateType } from '../const.js';
 
 export default class RoutePointPresenter {
   #container = null;
@@ -15,13 +16,15 @@ export default class RoutePointPresenter {
   #onModeSwitch = null;
 
   #currentMode = 'VIEW';
+  #typeOffers = null;
 
-  constructor({ container, destinations, offers, favoriteHandler, modeSwitchHandler }) {
+  constructor({ container, destinations, offers, favoriteHandler, modeSwitchHandler, typeOffers }) {
     this.#container = container;
     this.#destinationsData = destinations;
     this.#offersData = offers;
     this.#onFavoriteToggle = favoriteHandler;
     this.#onModeSwitch = modeSwitchHandler;
+    this.#typeOffers = typeOffers;
   }
 
   clearElements(){
@@ -42,11 +45,14 @@ export default class RoutePointPresenter {
       return;
     }
 
-    if (this.#currentMode === 'VIEW') {
+    if (this.#container.element.contains(prevPointView.element)) {
       replace(this.#pointView, prevPointView);
-    } else {
+    }
+
+    if (this.#container.element.contains(prevEditForm.element)) {
       replace(this.#editFormView, prevEditForm);
     }
+
     remove(prevPointView);
     remove(prevEditForm);
   }
@@ -88,9 +94,8 @@ export default class RoutePointPresenter {
     return new RoutePoint({
       point: this.#dataPoint,
       destinations: this.#destinationsData,
-      offers: this.#offersData,
-      onEditButtonClick: () => this.#switchToEditMode(),
-      onFavoriteButtonClick: () => this.#updateFavoriteStatus()
+      onEditButtonClick: this.#switchToEditMode.bind(this),
+      onFavoriteButtonClick: this.#updateFavoriteStatus()
     });
   }
 
@@ -100,13 +105,19 @@ export default class RoutePointPresenter {
       destinations: this.#destinationsData,
       offers: this.#offersData,
       onCancelButtonClick: () => this.#handleFormAction('cancel'),
-      onSubmitButtonClick: () => this.#handleFormAction('submit')
+      onSubmitButtonClick: () => this.#handleFormAction('submit'),
+      typeOffers: this.#typeOffers,
+      onDeleteClick: this.#handleDeleteButtonClick
     });
   }
 
+  #handleDeleteButtonClick = (point) => {
+    this.#onModeSwitch(UserAction.DELETE_POINT, UpdateType.MINOR, point);
+  };
+
   #handleFormAction = (action) => {
     if (action === 'submit') {
-      this.#onFavoriteToggle(this.#dataPoint);
+      this.#onModeSwitch(UserAction.UPDATE_POINT, UpdateType.MINOR, this.#dataPoint);
     } else if (action === 'cancel') {
       this.#editFormView.reset(this.#dataPoint);
     }
