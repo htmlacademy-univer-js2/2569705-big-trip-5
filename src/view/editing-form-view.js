@@ -26,11 +26,8 @@ function showNotification(message, type = 'error', container) {
 }
 
 function createFormEditingTemplate(point, destinations) {
-  console.log('Point:', point);
   const { basePrice, dateFrom, dateTo, destination, typeOffers, type } = point;
-  console.log(typeOffers)
   const pointTypeOffers = typeOffers.map((id) => getOfferById(id));
-  console.log(pointTypeOffers)
   const destinationInfo = getDestinationById(destination);
   const renderDestinationsList = destinations
     .map((dest) => `<option value="${dest.name}"></option>`)
