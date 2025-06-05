@@ -13,7 +13,6 @@ export default class PointCreationPresenter {
   #destinations = null;
   #favoriteHandler = null;
   #modeSwitchHandler = null;
-  #isCreating = false;
 
   constructor({ filterModel, pointListComponent, point, typeOffers, offers, destinations, favoriteHandler, modeSwitchHandler }) {
     this.#filterModel = filterModel;
@@ -83,6 +82,5 @@ export default class PointCreationPresenter {
     }
     this.#addButton.disabled = false;
     document.removeEventListener('keydown', this.#onEscKeydown);
-    this.#isCreating = false;
   };
 }

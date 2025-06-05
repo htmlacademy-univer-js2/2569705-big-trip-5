@@ -1,7 +1,7 @@
 import { getRandomArrayElement } from '../utils';
 
-const minPrice = 200;
-const maxPrice = 4000;
+const minPrice = 100;
+const maxPrice = 1500;
 
 const offersMock = [
   {

@@ -47,14 +47,6 @@ export default class Presenter {
     });
   }
 
-  #handleAddButtonClick = (evt) => {
-    evt.preventDefault();
-    evt.stopPropagation();
-    if (!this.#isCreating) {
-      this.createPoint();
-    }
-  };
-
   #handleUserAction = (actionType, updateType, update) => {
     const handlers = {
       [UserAction.UPDATE_POINT]: () => this.#pointsModel.updatePoint(updateType, update),

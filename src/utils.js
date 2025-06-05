@@ -97,7 +97,6 @@ const getOfferById = (id) => {
       return foundOffer;
     }
   }
-  return `Предложение с id=${id} не найдено`;
 };
 
 const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
