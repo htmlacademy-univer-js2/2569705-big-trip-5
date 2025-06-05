@@ -17,11 +17,13 @@ export default class RoutePointPresenter {
 
   #currentMode = 'VIEW';
   #typeOffers = null;
+  #onAction = null;
 
-  constructor({ container, destinations, offers, favoriteHandler, modeSwitchHandler, typeOffers }) {
+  constructor({ container, destinations, offers, actionHandler, favoriteHandler, modeSwitchHandler, typeOffers }) {
     this.#container = container;
     this.#destinationsData = destinations;
     this.#offersData = offers;
+    this.#onAction = actionHandler;
     this.#onFavoriteToggle = favoriteHandler;
     this.#onModeSwitch = modeSwitchHandler;
     this.#typeOffers = typeOffers;
@@ -30,6 +32,11 @@ export default class RoutePointPresenter {
   clearElements(){
     remove(this.#pointView);
     remove(this.#editFormView);
+  }
+
+  destroy() {
+    this.clearElements();
+    document.removeEventListener('keydown', this.#handleEscapeKey);
   }
 
   init(point) {
@@ -64,12 +71,12 @@ export default class RoutePointPresenter {
     }
   }
 
-  #switchToEditMode() {
+  #switchToEditMode = () => {
+    this.#onModeSwitch();
     replace(this.#editFormView, this.#pointView);
     document.addEventListener('keydown', this.#handleEscapeKey);
-    this.#onModeSwitch();
     this.#currentMode = 'EDIT';
-  }
+  };
 
   #switchToViewMode() {
     replace(this.#pointView, this.#editFormView);
@@ -77,9 +84,9 @@ export default class RoutePointPresenter {
     this.#currentMode = 'VIEW';
   }
 
-  #updateFavoriteStatus() {
-    this.#onFavoriteToggle({ ...this.#dataPoint, isFavorite: !this.#dataPoint.isFavorite });
-  }
+  #updateFavoriteStatus = () => {
+    this.#onFavoriteToggle(this.#dataPoint);
+  };
 
   #handleEscapeKey = (event) => {
     if (event.key === 'Escape') {
@@ -94,8 +101,9 @@ export default class RoutePointPresenter {
     return new RoutePoint({
       point: this.#dataPoint,
       destinations: this.#destinationsData,
-      onEditButtonClick: this.#switchToEditMode.bind(this),
-      onFavoriteButtonClick: this.#updateFavoriteStatus()
+      offers: this.#typeOffers,
+      onEditButtonClick: this.#switchToEditMode,
+      onFavoriteButtonClick: this.#updateFavoriteStatus
     });
   }
 
@@ -104,25 +112,26 @@ export default class RoutePointPresenter {
       point: this.#dataPoint,
       destinations: this.#destinationsData,
       offers: this.#offersData,
-      onCancelButtonClick: () => this.#handleFormAction('cancel'),
-      onSubmitButtonClick: () => this.#handleFormAction('submit'),
+      onFormReset: this.#handleFormCancel.bind(this),
+      onFormSubmit: this.#handleFormSubmit.bind(this),
       typeOffers: this.#typeOffers,
-      onDeleteClick: this.#handleDeleteButtonClick
+      onDeleteClick: this.#handleDeleteButtonClick,
     });
   }
 
   #handleDeleteButtonClick = (point) => {
-    this.#onModeSwitch(UserAction.DELETE_POINT, UpdateType.MINOR, point);
+    this.#switchToViewMode();
+    this.#onAction(UserAction.DELETE_POINT, UpdateType.DELETE, point);
   };
 
-  #handleFormAction = (action) => {
-    if (action === 'submit') {
-      this.#onModeSwitch(UserAction.UPDATE_POINT, UpdateType.MINOR, this.#dataPoint);
-    } else if (action === 'cancel') {
-      this.#editFormView.reset(this.#dataPoint);
-    }
-
+  #handleFormSubmit = (updatedPoint) => {
+    this.#onAction(UserAction.UPDATE_POINT, UpdateType.PATCH, updatedPoint);
     this.#switchToViewMode();
     document.removeEventListener('keydown', this.#handleEscapeKey);
+  };
+
+  #handleFormCancel = () => {
+    this.#editFormView.reset(this.#dataPoint);
+    this.#switchToViewMode();
   };
 }

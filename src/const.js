@@ -1,4 +1,4 @@
-import { isPointFuture, isPointPast, isPointPresent, getOffersByType } from './utils';
+import { isPointFuture, isPointPast, isPointPresent } from './utils';
 
 const Formats = {
   TIME: 'HH:mm',
@@ -31,7 +31,7 @@ const NEW_POINT = {
   dateFrom: '',
   dateTo: '',
   basePrice: 0,
-  offers: getOffersByType({ type: 'flight' }),
+  offers: [],
   isFavorite: false,
 };
 
@@ -45,7 +45,8 @@ const UserAction = {
 const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
-  MAJOR: 'MAJOR'
+  MAJOR: 'MAJOR',
+  DELETE: 'DELETE'
 };
 
 const NoPointMessages = {

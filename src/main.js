@@ -8,11 +8,11 @@ const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
 const pointListComponent = new RoutePointList();
 
-const eventsContainer = document.querySelector('.trip-events');
+const tripEventsElement = document.querySelector('.trip-events');
 const filtersContainer = document.querySelector('.trip-controls__filters');
 
 const presenter = new Presenter({
-  eventsContainer: eventsContainer,
+  eventsContainer: tripEventsElement,
   pointListComponent: pointListComponent,
   pointsModel: pointsModel,
   filterModel: filterModel

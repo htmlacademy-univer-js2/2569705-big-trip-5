@@ -32,19 +32,22 @@ export default class PointsModel extends Observable {
     this._notify(updateType, updatedPoint);
   }
 
-  addPoint(updateType, newPoint) {
-    this.#points = [newPoint, ...this.#points];
+  addPoint(updateType, update) {
+    const newPoint = {
+      ...update,
+      id: crypto.randomUUID()
+    };
+    this.#points = [...this.#points, newPoint];
     this._notify(updateType, newPoint);
   }
 
   deletePoint(updateType, pointId) {
-    const pointExists = this.#points.some((point) => point.id === pointId);
-    if (!pointExists) {
-      throw new Error('Cannot delete a non-existent point');
+    const index = this.#points.findIndex((point) => point.id === pointId);
+    if (index === -1) {
+      return;
     }
 
     this.#points = this.#points.filter((point) => point.id !== pointId);
-
-    this._notify(updateType, { id: pointId });
+    this._notify(updateType, pointId);
   }
 }

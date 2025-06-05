@@ -1,15 +1,16 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { formatDate, getDestinationById, getDuration, getOffersByType } from '../utils';
+import { formatDate, getDestinationById, getDuration, getOfferById } from '../utils';
 import { Formats } from '../const';
 
 export default class RoutePoint extends AbstractView {
   #point = null;
   #destinations = null;
-  constructor({ point, destinations, onEditButtonClick, onFavoriteButtonClick }) {
+  constructor({ point, destinations, offers, onEditButtonClick, onFavoriteButtonClick }) {
     super();
 
     this.#point = point;
     this.#destinations = destinations;
+    this.offers = offers;
 
     this.#addEventListeners(onEditButtonClick, onFavoriteButtonClick);
   }
@@ -39,7 +40,7 @@ export default class RoutePoint extends AbstractView {
 }
 
 function createRoutePointTemplate(point, destinations) {
-  const {basePrice, dateFrom, dateTo, destination, isFavorite, type} = point;
+  const {basePrice, dateFrom, dateTo, destination, isFavorite, type, offers} = point;
 
   const dayValue = formatDate(dateFrom, Formats.TIME_TAG_VALUE);
   const day = formatDate(dateFrom, Formats.DAY);
@@ -49,9 +50,8 @@ function createRoutePointTemplate(point, destinations) {
   const destinationById = getDestinationById(destination, destinations);
   const duration = getDuration(dateFrom, dateTo, 'string');
 
-  const offers = getOffersByType(point);
-  const selectedOffers = offers
-    .filter((offer) => point.offers.includes(offer.id))
+  const offersObject = offers.map((id) => getOfferById(id));
+  const selectedOffers = offersObject
     .map((offer) => `
       <li class="event__offer">
         <span class="event__offer-title">${offer.title}</span>

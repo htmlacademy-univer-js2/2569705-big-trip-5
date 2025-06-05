@@ -11,17 +11,10 @@ function formatDate(date, format) {
   return date ? dayjs(date).format(format) : '';
 }
 
-function getDestinationById(id, destinations) {
-  return destinations.find((destination) => destination.id === id);
-}
+const getDestinationById = (id) => destinationsMock.find((item) => item.id === id);
 
 function getOffersByType(point) {
   const offerGroup = offersMock.find((group) => group.type === point.type);
-
-  if (!offerGroup) {
-    return `Группа предложений для типа "${point.type}" не найдена`;
-  }
-
   return offerGroup.offers.map((offer) => offer.id);
 }
 

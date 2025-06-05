@@ -5,15 +5,15 @@ function createEmptyListTemplate(filterType) {
   return `<p class="trip-events__msg">${NoPointMessages[filterType.toUpperCase()]}</p>`;
 }
 
-export default class EmptyListView extends AbstractView {
+export default class NoPointsListView extends AbstractView {
   #filterType = null;
 
-  constructor(filterType) {
+  constructor({filterType}) {
     super();
     this.#filterType = filterType;
   }
 
   get template() {
-    return createEmptyListTemplate(this.#filterType.filterType);
+    return createEmptyListTemplate(this.#filterType);
   }
 }

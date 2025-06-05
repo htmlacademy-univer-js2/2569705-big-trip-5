@@ -21,18 +21,17 @@ export default class FilterPresenter {
 
     return Object.values(FilterType).map((type) => ({
       type,
-      points: filter[type](points)
+      count: filter[type](points).length
     }));
   }
 
   init() {
     const filtersData = this.filters;
     const previousFilterComponent = this.#filterComponent;
-
     this.#filterComponent = new Filters({
       filters: filtersData,
       activeFilterType: this.#filterModel.filter,
-      onFilterChange: this.#handleFilterTypeChange.bind(this)
+      onFilterTypeChange: this.#handleFilterTypeChange
     });
 
     if (!previousFilterComponent) {

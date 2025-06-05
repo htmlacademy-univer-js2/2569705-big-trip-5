@@ -4,7 +4,6 @@ import { EventTypes } from '../const.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-// Функция для создания всплывающего уведомления
 function showNotification(message, type = 'error', container) {
   const notificationElement = document.createElement('div');
   notificationElement.className = `notification notification--${type}`;
@@ -18,15 +17,33 @@ function showNotification(message, type = 'error', container) {
   notificationElement.style.borderRadius = '5px';
   notificationElement.style.zIndex = '1000';
   container.appendChild(notificationElement);
-
-  // Автоматическое удаление уведомления через 5 секунд
   setTimeout(() => {
     notificationElement.remove();
   }, 5000);
 }
 
+function generateAvailableOffers(offersForType, selectedOffers) {
+  return offersForType.map((offer) => `
+    <div class="event__offer-selector">
+      <input
+        class="event__offer-checkbox visually-hidden"
+        id="event-offer-${offer.id}"
+        type="checkbox"
+        name="event-offer"
+        value="${offer.id}"
+        ${selectedOffers.includes(offer.id) ? 'checked' : ''}
+      >
+      <label class="event__offer-label" for="event-offer-${offer.id}">
+        <span class="event__offer-title">${offer.title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${offer.price}</span>
+      </label>
+    </div>
+  `).join('');
+}
+
 function createFormEditingTemplate(point, destinations) {
-  const { basePrice, dateFrom, dateTo, destination, typeOffers, type } = point;
+  const { basePrice, dateFrom, dateTo, destination, typeOffers, type} = point;
   const pointTypeOffers = typeOffers.map((id) => getOfferById(id));
   const destinationInfo = getDestinationById(destination);
   const renderDestinationsList = destinations
@@ -102,16 +119,7 @@ function createFormEditingTemplate(point, destinations) {
             <section class="event__section event__section--offers">
               <h3 class="event__section-title event__section-title--offers">Offers</h3>
               <div class="event__available-offers">
-                ${pointTypeOffers.map((offer) => `
-                      <div class="event__offer-selector">
-                        <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title.toLowerCase()}-1" type="checkbox" name="event-offer-${offer.title.toLowerCase()}">
-                        <label class="event__offer-label" for="event-offer-${offer.title.toLowerCase()}-1">
-                          <span class="event__offer-title">${offer.title}</span>
-                          &plus;&euro;&nbsp;
-                          <span class="event__offer-price">${offer.price}</span>
-                        </label>
-                      </div>
-                    `).join('')}
+                ${generateAvailableOffers(pointTypeOffers, point.offers)}
               </div>
             </section>
           ` : ''}
@@ -194,17 +202,33 @@ export default class FormEditing extends AbstractStatefulView {
   };
 
   #handleEditDeleteClick = (evt) => {
-    evt.preventDefault();
-    this.#handleEditDelete(this.#point);
+    const deleteButton = evt.target;
+    deleteButton.disabled = true;
+    this.#handleEditDelete(this._state);
   };
 
   #handleTypeChange = (evt) => {
+    evt.preventDefault();
     const targetType = evt.target.value;
-    const typeOffers = this.#offers.find((item) => item.type === targetType).offers.map((offer) => offer.id);
+    const typeOfferGroup = this.#offers.find((item) => item.type === targetType);
+
+    if (typeOfferGroup) {
+      this.updateElement({
+        type: targetType,
+        typeOffers: typeOfferGroup.offers.map((offer) => offer.id),
+        offers: []
+      });
+    }
+  };
+
+  #handleOfferChange = (evt) => {
+    const offerId = evt.target.value;
+    const isChecked = evt.target.checked;
+
     this.updateElement({
-      type: targetType,
-      typeOffers: typeOffers,
-      offers: typeOffers
+      offers: isChecked
+        ? [...this._state.offers, offerId]
+        : this._state.offers.filter((id) => id !== offerId)
     });
   };
 
@@ -277,12 +301,15 @@ export default class FormEditing extends AbstractStatefulView {
   _restoreHandlers() {
     this.element.querySelector('form').addEventListener('submit', this.#handleSubmit);
     if (this.#handleFormReset) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleReset);
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleFormReset);
     }
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleEditDeleteClick);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#handleTypeChange);
+    this.element.querySelector('.event__type-list').addEventListener('change', this.#handleTypeChange);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#handleDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#handlePriceChange);
+    this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => {
+      checkbox.addEventListener('change', this.#handleOfferChange);
+    });
     this.#setDatepicker();
   }
 
@@ -290,7 +317,7 @@ export default class FormEditing extends AbstractStatefulView {
     return {
       ...point,
       destination: destinationInfo,
-      typeOffers
+      typeOffers: typeOffers
     };
   }
 }

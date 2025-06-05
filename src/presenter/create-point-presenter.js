@@ -1,5 +1,5 @@
 import FormEditing from '../view/editing-form-view.js';
-import { render, remove, RenderPosition } from '../framework/render';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
 
 export default class PointCreationPresenter {
@@ -13,6 +13,7 @@ export default class PointCreationPresenter {
   #destinations = null;
   #favoriteHandler = null;
   #modeSwitchHandler = null;
+  #isCreating = false;
 
   constructor({ filterModel, pointListComponent, point, typeOffers, offers, destinations, favoriteHandler, modeSwitchHandler }) {
     this.#filterModel = filterModel;
@@ -23,11 +24,16 @@ export default class PointCreationPresenter {
     this.#destinations = destinations;
     this.#favoriteHandler = favoriteHandler;
     this.#modeSwitchHandler = modeSwitchHandler;
-
+    this.#addButton.removeEventListener('click', this.#handleAddButtonClick);
+    this.#handleAddButtonClick = this.#handleAddButtonClick.bind(this);
     this.#addButton.addEventListener('click', this.#handleAddButtonClick);
   }
 
   init() {
+    if (this.#pointEditComponent) {
+      remove(this.#pointEditComponent);
+    }
+
     this.#pointEditComponent = new FormEditing({
       point: this.#point,
       typeOffers: this.#typeOffers,
@@ -37,7 +43,11 @@ export default class PointCreationPresenter {
       onDeleteClick: this.destroy
     });
 
-    render(this.#pointEditComponent, this.#pointListComponent.element, RenderPosition.AFTERBEGIN);
+    render(
+      this.#pointEditComponent,
+      this.#pointListComponent.element,
+      RenderPosition.AFTERBEGIN
+    );
   }
 
   #handleAddButtonClick = () => {
@@ -67,7 +77,12 @@ export default class PointCreationPresenter {
   };
 
   destroy = () => {
-    remove(this.#pointEditComponent);
+    if (this.#pointEditComponent) {
+      remove(this.#pointEditComponent);
+      this.#pointEditComponent = null;
+    }
     this.#addButton.disabled = false;
+    document.removeEventListener('keydown', this.#onEscKeydown);
+    this.#isCreating = false;
   };
 }
