@@ -25,7 +25,6 @@ const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
 const EventTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
 const NEW_POINT = {
-  id: crypto.randomUUID(),
   type: 'flight',
   destination: '',
   dateFrom: '',
@@ -46,7 +45,8 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
-  DELETE: 'DELETE'
+  DELETE: 'DELETE',
+  INIT: 'INIT'
 };
 
 const NoPointMessages = {
@@ -56,5 +56,17 @@ const NoPointMessages = {
   FUTURE: 'There are no future events now'
 };
 
+const Method = {
+  GET: 'GET',
+  POST: 'POST',
+  PUT: 'PUT',
+  DELETE: 'DELETE'
+};
 
-export { Formats, filter, SortTypes, EventTypes, NEW_POINT, UserAction, UpdateType, NoPointMessages, FilterType };
+const TimeLimit = {
+  LOWER_LIMIT: 400,
+  UPPER_LIMIT: 800
+};
+
+
+export { Formats, filter, SortTypes, EventTypes, NEW_POINT, UserAction, UpdateType, NoPointMessages, FilterType, Method, TimeLimit };

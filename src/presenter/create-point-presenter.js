@@ -1,28 +1,28 @@
 import FormEditing from '../view/editing-form-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
+import { getOffersByType } from '../utils.js';
 
 export default class PointCreationPresenter {
   #pointListComponent = null;
   #pointEditComponent = null;
   #filterModel = null;
+  #pointsModel = null;
   #addButton = document.querySelector('.trip-main__event-add-btn');
   #point = null;
-  #typeOffers = null;
-  #offers = null;
-  #destinations = null;
   #favoriteHandler = null;
   #modeSwitchHandler = null;
+  #onAddButtonClick = null;
 
-  constructor({ filterModel, pointListComponent, point, typeOffers, offers, destinations, favoriteHandler, modeSwitchHandler }) {
+
+  constructor({ filterModel, pointsModel, pointListComponent, point, favoriteHandler, modeSwitchHandler, onAddButtonClick}) {
     this.#filterModel = filterModel;
+    this.#pointsModel = pointsModel;
     this.#pointListComponent = pointListComponent;
     this.#point = point;
-    this.#typeOffers = typeOffers;
-    this.#offers = offers;
-    this.#destinations = destinations;
     this.#favoriteHandler = favoriteHandler;
     this.#modeSwitchHandler = modeSwitchHandler;
+    this.#onAddButtonClick = onAddButtonClick;
     this.#addButton.removeEventListener('click', this.#handleAddButtonClick);
     this.#handleAddButtonClick = this.#handleAddButtonClick.bind(this);
     this.#addButton.addEventListener('click', this.#handleAddButtonClick);
@@ -35,9 +35,9 @@ export default class PointCreationPresenter {
 
     this.#pointEditComponent = new FormEditing({
       point: this.#point,
-      typeOffers: this.#typeOffers,
-      offers: this.#offers,
-      destinations: this.#destinations,
+      typeOffers: getOffersByType(this.#pointsModel.offers, this.#point.type),
+      offers: this.#pointsModel.offers,
+      destinations: this.#pointsModel.destinations,
       onFormSubmit: this.#handleFormSubmit.bind(this),
       onDeleteClick: this.destroy
     });
@@ -50,6 +50,7 @@ export default class PointCreationPresenter {
   }
 
   #handleAddButtonClick = () => {
+    this.#onAddButtonClick();
     this.#modeSwitchHandler();
     document.addEventListener('keydown', this.#onEscKeydown);
     this.init();
@@ -62,9 +63,11 @@ export default class PointCreationPresenter {
       UpdateType.MAJOR,
       update
     );
-    this.#filterModel.setFilter(UpdateType.MAJOR, 'everything');
-    document.removeEventListener('keydown', this.#onEscKeydown);
-    this.destroy();
+    if (update.isSaving) {
+      this.#filterModel.setFilter(UpdateType.MAJOR, 'everything');
+      document.removeEventListener('keydown', this.#onEscKeydown);
+      this.destroy();
+    }
   };
 
   #onEscKeydown = (evt) => {
@@ -83,4 +86,18 @@ export default class PointCreationPresenter {
     this.#addButton.disabled = false;
     document.removeEventListener('keydown', this.#onEscKeydown);
   };
+
+  setAborting() {
+    if (this.#pointEditComponent) {
+      this.#pointEditComponent.shake(() => {
+        this.#pointEditComponent.updateElement({ isSaving: false, isDisabled: false });
+      });
+    }
+  }
+
+  setSaving() {
+    if (this.#pointEditComponent) {
+      this.#pointEditComponent.updateElement({ isSaving: true, isDisabled: true });
+    }
+  }
 }

@@ -5,12 +5,13 @@ import { Formats } from '../const';
 export default class RoutePoint extends AbstractView {
   #point = null;
   #destinations = null;
+  #offers = null;
   constructor({ point, destinations, offers, onEditButtonClick, onFavoriteButtonClick }) {
     super();
 
     this.#point = point;
     this.#destinations = destinations;
-    this.offers = offers;
+    this.#offers = offers;
 
     this.#addEventListeners(onEditButtonClick, onFavoriteButtonClick);
   }
@@ -35,11 +36,11 @@ export default class RoutePoint extends AbstractView {
   }
 
   get template() {
-    return createRoutePointTemplate(this.#point, this.#destinations);
+    return createRoutePointTemplate(this.#point, this.#destinations, this.#offers);
   }
 }
 
-function createRoutePointTemplate(point, destinations) {
+function createRoutePointTemplate(point, destinations, allOffers) {
   const {basePrice, dateFrom, dateTo, destination, isFavorite, type, offers} = point;
 
   const dayValue = formatDate(dateFrom, Formats.TIME_TAG_VALUE);
@@ -47,11 +48,10 @@ function createRoutePointTemplate(point, destinations) {
   const timeStart = formatDate(dateFrom, Formats.TIME);
   const timeEnd = formatDate(dateTo, Formats.TIME);
 
-  const destinationById = getDestinationById(destination, destinations);
+  const destinationById = getDestinationById(destinations, destination);
   const duration = getDuration(dateFrom, dateTo, 'string');
-
-  const offersObject = offers.map((id) => getOfferById(id));
-  const selectedOffers = offersObject
+  const offersObject = offers.map((id) => getOfferById(allOffers, id));
+  const selectedOffers = offersObject ? offersObject
     .map((offer) => `
       <li class="event__offer">
         <span class="event__offer-title">${offer.title}</span>
@@ -59,7 +59,7 @@ function createRoutePointTemplate(point, destinations) {
         <span class="event__offer-price">${offer.price}</span>
       </li>
     `)
-    .join('');
+    .join('') : '';
 
   const favorite = isFavorite ? 'event__favorite-btn--active' : '';
 

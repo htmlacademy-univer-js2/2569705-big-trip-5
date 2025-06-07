@@ -2,6 +2,7 @@ import RoutePoint from '../view/route-point-view.js';
 import FormEditing from '../view/editing-form-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
+import { getOffersByType } from '../utils.js';
 
 export default class RoutePointPresenter {
   #container = null;
@@ -43,11 +44,15 @@ export default class RoutePointPresenter {
     const prevPointView = this.#pointView;
     const prevEditForm = this.#editFormView;
 
-    this.#dataPoint = point;
+    this.#dataPoint = point; // Обновляем данные
+    this.#typeOffers = getOffersByType(this.#offersData, point.type);
+
+    // Полное пересоздание представлений
     this.#pointView = this.#createPointView();
     this.#editFormView = this.#createEditFormView();
 
-    if (!prevPointView || !prevEditForm) {
+    // // Замена старых элементов новыми
+    if (prevPointView === null || prevEditForm === null) {
       render(this.#pointView, this.#container.element);
       return;
     }
@@ -85,7 +90,12 @@ export default class RoutePointPresenter {
   }
 
   #updateFavoriteStatus = () => {
-    this.#onFavoriteToggle(this.#dataPoint);
+    const updatedPoint = {
+      ...this.#dataPoint,
+      isFavorite: this.#dataPoint.isFavorite
+    };
+    this.#onFavoriteToggle(updatedPoint); // Передаем обновленные данные
+    this.#dataPoint = updatedPoint;
   };
 
   #handleEscapeKey = (event) => {
@@ -120,18 +130,46 @@ export default class RoutePointPresenter {
   }
 
   #handleDeleteButtonClick = (point) => {
-    this.#switchToViewMode();
+    // this.#switchToViewMode();
     this.#onAction(UserAction.DELETE_POINT, UpdateType.DELETE, point);
   };
 
-  #handleFormSubmit = (updatedPoint) => {
-    this.#onAction(UserAction.UPDATE_POINT, UpdateType.PATCH, updatedPoint);
-    this.#switchToViewMode();
-    document.removeEventListener('keydown', this.#handleEscapeKey);
+  #handleFormSubmit = async (updatedPoint) => {
+    // Сохраняем ссылки на элементы ДО асинхронной операции
+    const pointView = this.#pointView;
+    const editFormView = this.#editFormView;
+
+    const e = await this.#onAction(UserAction.UPDATE_POINT, UpdateType.PATCH, updatedPoint);
+
+    // Проверяем, существуют ли ещё элементы
+    if (!e && pointView && editFormView) {
+      this.#switchToViewMode();
+    }
   };
 
   #handleFormCancel = () => {
     this.#editFormView.reset(this.#dataPoint);
     this.#switchToViewMode();
   };
+
+  setAborting() {
+    if (this.#currentMode === 'VIEW') {
+      this.#pointView.shake();
+      return;
+    }
+
+    this.#editFormView.shake(this.#editFormView.updateElement({ isDisabled: false, isSaving: false, isDeleting: false }));
+  }
+
+  setSaving() {
+    if (this.#currentMode === 'EDIT') {
+      this.#editFormView.updateElement({ isDisabled: true, isSaving: true });
+    }
+  }
+
+  setDeleting() {
+    if (this.#currentMode === 'EDIT') {
+      this.#editFormView.updateElement({ isDisabled: true, isDeleting: true });
+    }
+  }
 }
