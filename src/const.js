@@ -1,4 +1,29 @@
-import { isPointFuture, isPointPast, isPointPresent } from './utils';
+import { isPointFuture, isPointPast, isPointPresent, sortByField } from './utils';
+import dayjs from 'dayjs';
+
+const DEFAULT_POINT = {
+  type: 'flight',
+  destination: '',
+  dateFrom: '',
+  dateTo: '',
+  basePrice: 0,
+  offers: [],
+  isFavorite: false,
+};
+
+const SORT_TYPES = ['day', 'event', 'time', 'price', 'offers'];
+
+const SORT = {
+  [SORT_TYPES[0]]: (points) => sortByField(points, 'dateFrom', 'desc'),
+  [SORT_TYPES[2]]: (points) => {
+    const pointsWithDuration = points.map((point) => ({
+      ...point,
+      duration: dayjs(point.dateTo).diff(dayjs(point.dateFrom)),
+    }));
+    return sortByField(pointsWithDuration, 'duration', 'desc');
+  },
+  [SORT_TYPES[3]]: (points) => sortByField(points, 'basePrice', 'desc'),
+};
 
 const Formats = {
   TIME: 'HH:mm',
@@ -14,30 +39,17 @@ const FilterType = {
   PAST:'past',
 };
 
-const filter = {
+const FILTER = {
   [FilterType.EVERYTHING]: (points) => [...points],
   [FilterType.FUTURE]: (points) => points.filter((point) => isPointFuture(point)),
   [FilterType.PRESENT]: (points) => points.filter((point) => isPointPresent(point)),
   [FilterType.PAST]: (points) => points.filter((point) => isPointPast(point))
 };
 
-const modeType = {
+const ModeType = {
   VIEW: 'VIEW',
   EDIT: 'EDIT'
 };
-
-const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
-
-const NEW_POINT = {
-  type: 'flight',
-  destination: '',
-  dateFrom: '',
-  dateTo: '',
-  basePrice: 0,
-  offers: [],
-  isFavorite: false,
-};
-
 
 const UserAction = {
   UPDATE_POINT: 'UPDATE_POINT',
@@ -47,7 +59,6 @@ const UserAction = {
 
 const UpdateType = {
   PATCH: 'PATCH',
-  MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   DELETE: 'DELETE',
   INIT: 'INIT'
@@ -67,14 +78,14 @@ const Method = {
   DELETE: 'DELETE'
 };
 
-const TimeLimit = {
+const BlockLimit = {
   LOWER_LIMIT: 400,
   UPPER_LIMIT: 800
 };
 
 const ServerConfig = {
   END_POINT: 'https://24.objects.htmlacademy.pro/big-trip',
-  AUTHORIZATION: 'Basic 742398hjydtuk6'
+  AUTHORIZATION: 'Basic 742398hjydtufgsh'
 };
 
-export { Formats, filter, SortTypes, NEW_POINT, UserAction, UpdateType, NoEventsMessages, FilterType, Method, TimeLimit, modeType, ServerConfig };
+export { Formats, FILTER, SORT_TYPES, DEFAULT_POINT, UserAction, UpdateType, NoEventsMessages, FilterType, Method, BlockLimit, ModeType, ServerConfig, SORT };

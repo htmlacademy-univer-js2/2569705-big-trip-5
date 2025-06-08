@@ -1,8 +1,8 @@
-import AbstractView from '../framework/view/abstract-view';
-import { SortTypes } from '../const.js';
-import { sort, getRouteInfo } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import { SORT_TYPES, SORT } from '../const.js';
+import { getRouteInfo } from '../utils.js';
 
-function createTripInfoTemplate(points, destinations, offers) {
+function createTripInformationTemplate(points, destinations, offers) {
   const routeInfo = getRouteInfo(points, destinations, offers);
 
   return `<section class="trip-main__trip-info  trip-info">
@@ -16,17 +16,17 @@ function createTripInfoTemplate(points, destinations, offers) {
           </section>`;
 }
 
-export default class TripView extends AbstractView {
+export default class TripInformation extends AbstractView {
   #points = null;
   #pointsModel = null;
 
   constructor({ pointsModel }) {
     super();
     this.#pointsModel = pointsModel;
-    this.#points = sort[SortTypes[0]](pointsModel.points);
+    this.#points = SORT[SORT_TYPES[0]](pointsModel.points);
   }
 
   get template() {
-    return createTripInfoTemplate(this.#points, this.#pointsModel.destinations, this.#pointsModel.offers);
+    return createTripInformationTemplate(this.#points, this.#pointsModel.destinations, this.#pointsModel.offers);
   }
 }

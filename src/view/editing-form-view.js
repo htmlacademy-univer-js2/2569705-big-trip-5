@@ -6,21 +6,21 @@ import 'flatpickr/dist/flatpickr.min.css';
 export default class EditingForm extends AbstractStatefulView {
   #offers = null;
   #destinations = [];
-  #handleFormSubmit = null;
-  #handleFormReset = null;
+  #formSubmitHandler = null;
+  #formResetHandler = null;
   #startDate = null;
   #endDate = null;
-  #handleEditDelete = null;
+  #editDeleteHandler = null;
   #typeOffers = null;
 
-  constructor({ point, offers, destinations, onFormSubmit, onFormReset = null, typeOffers, onDeleteClick }) {
+  constructor({ point, offers, destinations, formSubmitHandler, formResetHandler = null, typeOffers, deleteClickHandler }) {
     super();
     this._setState(EditingForm.parsePointToState(point, point.destination, typeOffers));
     this.#offers = offers;
     this.#destinations = destinations;
-    this.#handleFormSubmit = onFormSubmit;
-    this.#handleFormReset = onFormReset;
-    this.#handleEditDelete = onDeleteClick;
+    this.#formSubmitHandler = formSubmitHandler;
+    this.#formResetHandler = formResetHandler;
+    this.#editDeleteHandler = deleteClickHandler;
     this.#typeOffers = typeOffers;
     this._restoreHandlers();
   }
@@ -46,23 +46,47 @@ export default class EditingForm extends AbstractStatefulView {
     }
   }
 
-  #handleSubmit = async (evt) => {
+  #setDatepicker() {
+    this.#startDate = flatpickr(
+      this.element.querySelector('input[name=\'event-start-time\']'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler
+      }
+    );
+    this.#endDate = flatpickr(
+      this.element.querySelector('input[name=\'event-end-time\']'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+        minDate: this._state.dateFrom
+      }
+    );
+  }
+
+  #submitHandler = async (evt) => {
     evt.preventDefault();
     try {
       this.#validateForm();
-      await this.#handleFormSubmit(this._state);
+      await this.#formSubmitHandler(this._state);
     } catch (error) {
       throw new Error;
     }
   };
 
-  #handleEditDeleteClick = (evt) => {
+  #editDeleteClickHandler = (evt) => {
     const deleteButton = evt.target;
     deleteButton.disabled = true;
-    this.#handleEditDelete(this._state);
+    this.#editDeleteHandler(this._state);
   };
 
-  #handleTypeChange = (evt) => {
+  #typeChangeHandler = (evt) => {
     evt.preventDefault();
     const targetType = evt.target.value;
     const typeOfferGroup = this.#offers.find((item) => item.type === targetType);
@@ -75,7 +99,7 @@ export default class EditingForm extends AbstractStatefulView {
     }
   };
 
-  #handleOfferChange = (evt) => {
+  #offerChangeHandler = (evt) => {
     const offerId = evt.target.value;
     const isChecked = evt.target.checked;
 
@@ -86,7 +110,7 @@ export default class EditingForm extends AbstractStatefulView {
     });
   };
 
-  #handleDestinationChange = (evt) => {
+  #destinationChangeHandler = (evt) => {
     const newDestination = this.#destinations.find((dest) => dest.name === evt.target.value);
     if (newDestination) {
       this.updateElement({
@@ -97,7 +121,7 @@ export default class EditingForm extends AbstractStatefulView {
     }
   };
 
-  #handlePriceChange = (evt) => {
+  #priceChangeHandler = (evt) => {
     evt.preventDefault();
     evt.target.value = Number(evt.target.value.replace(/[^0-9]/g, ''));
     this._setState({
@@ -105,62 +129,38 @@ export default class EditingForm extends AbstractStatefulView {
     });
   };
 
-  reset(point) {
-    this.updateElement(point);
-  }
-
-  #handleDateFromChange = ([userDate]) => {
+  #dateFromChangeHandler = ([userDate]) => {
     this._setState({
       dateFrom: userDate
     });
     this.#endDate.set('minDate', this._state.dateFrom);
   };
 
-  #handleDateToChange = ([userDate]) => {
+  #dateToChangeHandler = ([userDate]) => {
     this._setState({
       dateTo: userDate
     });
   };
 
-  #setDatepicker() {
-    this.#startDate = flatpickr(
-      this.element.querySelector('input[name=\'event-start-time\']'),
-      {
-        dateFormat: 'd/m/y H:i',
-        enableTime: true,
-        'time_24hr': true,
-        defaultDate: this._state.dateFrom,
-        onChange: this.#handleDateFromChange
-      }
-    );
-    this.#endDate = flatpickr(
-      this.element.querySelector('input[name=\'event-end-time\']'),
-      {
-        dateFormat: 'd/m/y H:i',
-        enableTime: true,
-        'time_24hr': true,
-        defaultDate: this._state.dateTo,
-        onChange: this.#handleDateToChange,
-        minDate: this._state.dateFrom
-      }
-    );
-  }
-
   _restoreHandlers() {
-    this.element.querySelector('form').addEventListener('submit', this.#handleSubmit);
-    if (this.#handleFormReset) {
-      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleFormReset);
+    this.element.querySelector('form').addEventListener('submit', this.#submitHandler);
+    if (this.#formResetHandler) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formResetHandler);
     }
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleEditDeleteClick);
-    this.element.querySelector('.event__type-list').addEventListener('change', this.#handleTypeChange);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#handleDestinationChange);
-    this.element.querySelector('.event__input--price').addEventListener('input', this.#handlePriceChange);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#editDeleteClickHandler);
+    this.element.querySelector('.event__type-list').addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceChangeHandler);
     this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => {
-      checkbox.addEventListener('change', this.#handleOfferChange);
+      checkbox.addEventListener('change', this.#offerChangeHandler);
     });
     const typeOffers = this.element.querySelectorAll('.event__offer-checkbox');
-    typeOffers.forEach((offer) => offer.addEventListener('change', this.#handleOfferChange));
+    typeOffers.forEach((offer) => offer.addEventListener('change', this.#offerChangeHandler));
     this.#setDatepicker();
+  }
+
+  reset(point) {
+    this.updateElement(point);
   }
 
   static parsePointToState(point, destinationInfo) {
@@ -193,7 +193,7 @@ function generateAvailableOffers(offersForType, selectedOffers, isDisabled) {
 }
 
 function createFormEditingTemplate(point, destinations, allOffers, typeOffers) {
-  const { basePrice, dateFrom, dateTo, destination, type, isSaving, isDeleting, isDisabled} = point;
+  const { basePrice, dateFrom, dateTo, destination, type, isSaving, isDeleting, isDisabled, isPointCreation} = point;
   const pointTypeOffers = typeOffers;
   const destinationInfo = getDestinationById(destinations, destination);
   const eventTypes = Array.from(allOffers.map((item) => item.type));
@@ -259,7 +259,7 @@ function createFormEditingTemplate(point, destinations, allOffers, typeOffers) {
             <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price"  ${isDisabled ? 'disabled' : ''} value="${basePrice}">
           </div>
           <button class="event__save-btn btn btn--blue" type="submit"${isDisabled ? 'disabled' : ''}>${saveButtonText}</button>
-          <button class="event__reset-btn" type="reset"${isDisabled ? 'disabled' : ''}>${deleteButtonText}</button>
+          <button class="event__reset-btn" type="reset"${isDisabled ? 'disabled' : ''}>${isPointCreation ? 'Cancel' : deleteButtonText}</button>
           ${isValid ? `
             <button class="event__rollup-btn" type="button">
               <span class="visually-hidden">Open event</span>

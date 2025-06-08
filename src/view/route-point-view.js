@@ -6,37 +6,37 @@ export default class RoutePoint extends AbstractView {
   #point = null;
   #destinations = null;
   #offers = null;
-  constructor({ point, destinations, offers, onEditButtonClick, onFavoriteButtonClick }) {
+  constructor({ point, destinations, offers, editButtonClickHandler, favoriteButtonClickHandler }) {
     super();
 
     this.#point = point;
     this.#destinations = destinations;
     this.#offers = offers;
 
-    this.#addEventListeners(onEditButtonClick, onFavoriteButtonClick);
+    this.#addEventListeners(editButtonClickHandler, favoriteButtonClickHandler);
   }
 
-  #addEventListeners(onEditButtonClick, onFavoriteButtonClick) {
+  get template() {
+    return createRoutePointTemplate(this.#point, this.#destinations, this.#offers);
+  }
+
+  #addEventListeners(editButtonClickHandler, favoriteButtonClickHandler) {
     const rollupButton = this.element.querySelector('.event__rollup-btn');
     const favoriteButton = this.element.querySelector('.event__favorite-btn');
 
     if (rollupButton) {
       rollupButton.addEventListener('click', (event) => {
         event.preventDefault();
-        onEditButtonClick();
+        editButtonClickHandler();
       });
     }
 
     if (favoriteButton) {
       favoriteButton.addEventListener('click', (event) => {
         event.preventDefault();
-        onFavoriteButtonClick();
+        favoriteButtonClickHandler();
       });
     }
-  }
-
-  get template() {
-    return createRoutePointTemplate(this.#point, this.#destinations, this.#offers);
   }
 }
 
@@ -45,9 +45,8 @@ function createRoutePointTemplate(point, destinations, allOffers) {
 
   const dayValue = formatDate(dateFrom, Formats.TIME_TAG_VALUE);
   const day = formatDate(dateFrom, Formats.DAY);
-  const timeStart = formatDate(dateFrom, Formats.TIME);
-  const timeEnd = formatDate(dateTo, Formats.TIME);
-
+  const startTime = formatDate(dateFrom, Formats.TIME);
+  const endTime = formatDate(dateTo, Formats.TIME);
   const destinationById = getDestinationById(destinations, destination);
   const duration = getDuration(dateFrom, dateTo, 'string');
   const offersObject = offers.map((id) => getOfferById(allOffers, id));
@@ -72,9 +71,9 @@ function createRoutePointTemplate(point, destinations, allOffers) {
               <h3 class="event__title">${type} ${destinationById.name}</h3>
               <div class="event__schedule">
                 <p class="event__time">
-                  <time class="event__start-time" datetime="${dateFrom}">${timeStart}</time>
+                  <time class="event__start-time" datetime="${dateFrom}">${startTime}</time>
                   &mdash;
-                  <time class="event__end-time" datetime="${dateTo}">${timeEnd}</time>
+                  <time class="event__end-time" datetime="${dateTo}">${endTime}</time>
                 </p>
                 <p class="event__duration">${duration}</p>
               </div>

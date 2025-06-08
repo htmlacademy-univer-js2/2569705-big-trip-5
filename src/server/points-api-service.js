@@ -62,6 +62,7 @@ export default class PointsApiService extends ApiService {
     delete adaptedPoint.isDisabled;
     delete adaptedPoint.isDeleting;
     delete adaptedPoint.duration;
+    delete adaptedPoint.isPointCreation;
     return adaptedPoint;
   };
 }

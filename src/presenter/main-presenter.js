@@ -1,7 +1,7 @@
 import Sorting from '../view/sorting-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
-import NoPointsListView from '../view/no-points-view.js';
-import { SortTypes, NEW_POINT, filter, UserAction, UpdateType, FilterType, TimeLimit } from '../const.js';
+import NoPointsListView from '../view/no-points-list-view.js';
+import { SORT_TYPES, DEFAULT_POINT, UserAction, UpdateType, FilterType, BlockLimit, FILTER } from '../const.js';
 import { sortByField, getDuration, getOffersByType } from '../utils.js';
 import RoutePointPresenter from './route-point-presenter.js';
 import PointCreationPresenter from './create-point-presenter.js';
@@ -26,8 +26,8 @@ export default class Presenter {
   #errorComponent = new LoadingErrorView();
   #isLoading = true;
   #uiBlocker = new UiBlocker({
-    lowerLimit: TimeLimit.LOWER_LIMIT,
-    upperLimit: TimeLimit.UPPER_LIMIT
+    lowerLimit: BlockLimit.LOWER_LIMIT,
+    upperLimit: BlockLimit.UPPER_LIMIT
   });
 
   constructor({ pointsModel, eventsContainer, pointListComponent, filterModel }) {
@@ -36,22 +36,22 @@ export default class Presenter {
     this.#eventsContainer = eventsContainer;
     this.#tripEventsSection = eventsContainer;
     this.#pointListComponent = pointListComponent || new RoutePointList();
-    this.#pointsModel.addObserver(this.#handleModelChange);
-    this.#filterModel.addObserver(this.#handleModelChange);
-    this.#handleUserAction = this.#handleUserAction.bind(this);
+    this.#pointsModel.addObserver(this.#modelChangeHandler);
+    this.#filterModel.addObserver(this.#modelChangeHandler);
+    this.#userActionHandler = this.#userActionHandler.bind(this);
 
     this.#pointCreationPresenter = new PointCreationPresenter({
       filterModel: this.#filterModel,
       pointsModel: this.#pointsModel,
       pointListComponent: this.#pointListComponent,
-      point: NEW_POINT,
-      favoriteHandler: this.#handleUserAction,
-      modeSwitchHandler: this.#handleModeChange.bind(this),
-      onAddButtonClick: this.#onAddButtonClick.bind(this)
+      point: DEFAULT_POINT,
+      favoriteHandler: this.#userActionHandler,
+      modeSwitchHandler: this.#modeChangeHandler.bind(this),
+      addButtonClickHandler: this.#addButtonClickHandler.bind(this)
     });
   }
 
-  #handleUserAction = async (actionType, updateType, update) => {
+  #userActionHandler = async (actionType, updateType, update) => {
     const presenter = this.#pointPresenters.get(update.id);
 
     const handlers = {
@@ -84,17 +84,13 @@ export default class Presenter {
     }
   };
 
-  #handleModelChange = (updateType, update) => {
+  #modelChangeHandler = (updateType, update) => {
     const handlers = {
       [UpdateType.PATCH]: () => {
         const presenter = this.#pointPresenters.get(update.id);
         if (presenter) {
           presenter.init(update);
         }
-      },
-      [UpdateType.MINOR]: () => {
-        this.#clearPointsList();
-        this.#renderRoutePoints();
       },
       [UpdateType.MAJOR]: () => {
         this.#clearPointsList();
@@ -136,7 +132,7 @@ export default class Presenter {
     }
     this.#clearPointsList();
     if (isFilterChanged) {
-      this.#currentSortType = SortTypes[0];
+      this.#currentSortType = SORT_TYPES[0];
       this.#renderSorting();
     }
 
@@ -153,7 +149,7 @@ export default class Presenter {
     this.points.forEach((point) => this.#renderPoint(point));
   };
 
-  #handleModeChange = () => {
+  #modeChangeHandler = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
     this.#pointCreationPresenter.destroy();
     if (this.points.length === 0) {
@@ -162,10 +158,10 @@ export default class Presenter {
   };
 
   async init() {
-    this.#onSortChange(SortTypes[0]);
+    this.#sortChangeHandler(SORT_TYPES[0]);
   }
 
-  #onSortChange(sortTypes) {
+  #sortChangeHandler(sortTypes) {
     if (this.#currentSortType !== sortTypes) {
       this.#currentSortType = sortTypes;
       this.#renderSorting();
@@ -193,7 +189,7 @@ export default class Presenter {
     }
     this.#sortComponent = new Sorting({
       sortingType: this.#currentSortType,
-      onSortingChange: this.#handleSortTypeChange.bind(this)
+      sortingChangeHandler: this.#sortTypeChangeHandler.bind(this)
     });
     render(this.#sortComponent, this.#eventsContainer, RenderPosition.AFTERBEGIN);
   }
@@ -204,14 +200,14 @@ export default class Presenter {
       destinations: this.destinations,
       offers: this.offers,
       favoriteHandler: (p) => {
-        this.#handleUserAction(UserAction.UPDATE_POINT, UpdateType.PATCH, {
+        this.#userActionHandler(UserAction.UPDATE_POINT, UpdateType.PATCH, {
           ...p,
           isFavorite: !p.isFavorite
         });
       },
-      modeSwitchHandler: this.#handleModeChange.bind(this),
+      modeSwitchHandler: this.#modeChangeHandler.bind(this),
       typeOffers: getOffersByType(this.offers, point.type),
-      actionHandler: this.#handleUserAction,
+      actionHandler: this.#userActionHandler,
     });
 
     pointPresenter.init(point);
@@ -224,12 +220,12 @@ export default class Presenter {
       ...point,
       duration: getDuration(point.dateFrom, point.dateTo)
     }));
-    const filteredPoints = filter[this.#filterType](points);
+    const filteredPoints = FILTER[this.#filterType](points);
 
     switch (this.#currentSortType) {
-      case SortTypes[3]:
+      case SORT_TYPES[3]:
         return sortByField(filteredPoints, 'basePrice', 'desc');
-      case SortTypes[2]:
+      case SORT_TYPES[2]:
         return sortByField(filteredPoints, 'duration', 'desc');
       default:
         return sortByField(filteredPoints, 'dateFrom', 'asc');
@@ -244,7 +240,7 @@ export default class Presenter {
     return this.#pointsModel.offers;
   }
 
-  #handleSortTypeChange = (newSortType) => {
+  #sortTypeChangeHandler = (newSortType) => {
     if (this.#currentSortType === newSortType) {
       return;
     }
@@ -268,8 +264,8 @@ export default class Presenter {
     render(this.#errorComponent, this.#eventsContainer, RenderPosition.BEFOREEND);
   }
 
-  #onAddButtonClick() {
+  #addButtonClickHandler() {
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this.#currentSortType = SortTypes[0];
+    this.#currentSortType = SORT_TYPES[0];
   }
 }
