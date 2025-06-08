@@ -85,7 +85,7 @@ const BlockLimit = {
 
 const ServerConfig = {
   END_POINT: 'https://24.objects.htmlacademy.pro/big-trip',
-  AUTHORIZATION: 'Basic 742398hjydtuk6'
+  AUTHORIZATION: 'Basic 742398hjydtufgsh'
 };
 
 export { Formats, FILTER, SORT_TYPES, DEFAULT_POINT, UserAction, UpdateType, NoEventsMessages, FilterType, Method, BlockLimit, ModeType, ServerConfig, SORT };

@@ -41,6 +41,7 @@ export default class PointCreationPresenter {
       formSubmitHandler: this.#formSubmitHandler.bind(this),
       deleteClickHandler: this.destroy
     });
+    this.#pointEditComponent.updateElement({ isPointCreation: true });
 
     render(
       this.#pointEditComponent,

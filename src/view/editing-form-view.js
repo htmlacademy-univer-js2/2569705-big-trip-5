@@ -193,7 +193,7 @@ function generateAvailableOffers(offersForType, selectedOffers, isDisabled) {
 }
 
 function createFormEditingTemplate(point, destinations, allOffers, typeOffers) {
-  const { basePrice, dateFrom, dateTo, destination, type, isSaving, isDeleting, isDisabled} = point;
+  const { basePrice, dateFrom, dateTo, destination, type, isSaving, isDeleting, isDisabled, isPointCreation} = point;
   const pointTypeOffers = typeOffers;
   const destinationInfo = getDestinationById(destinations, destination);
   const eventTypes = Array.from(allOffers.map((item) => item.type));
@@ -259,7 +259,7 @@ function createFormEditingTemplate(point, destinations, allOffers, typeOffers) {
             <input class="event__input event__input--price" id="event-price-1" type="text" name="event-price"  ${isDisabled ? 'disabled' : ''} value="${basePrice}">
           </div>
           <button class="event__save-btn btn btn--blue" type="submit"${isDisabled ? 'disabled' : ''}>${saveButtonText}</button>
-          <button class="event__reset-btn" type="reset"${isDisabled ? 'disabled' : ''}>${deleteButtonText}</button>
+          <button class="event__reset-btn" type="reset"${isDisabled ? 'disabled' : ''}>${isPointCreation ? 'Cancel' : deleteButtonText}</button>
           ${isValid ? `
             <button class="event__rollup-btn" type="button">
               <span class="visually-hidden">Open event</span>
