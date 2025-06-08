@@ -27,21 +27,20 @@ export default class FilterPresenter {
 
   init() {
     const filtersData = this.filters;
-    const previousFilterComponent = this.#filterComponent;
-
+    const prevFilterComponent = this.#filterComponent;
     this.#filterComponent = new Filters({
       filters: filtersData,
       activeFilterType: this.#filterModel.filter,
-      onFilterChange: this.#handleFilterTypeChange.bind(this)
+      onFilterTypeChange: this.#handleFilterTypeChange
     });
 
-    if (!previousFilterComponent) {
+    if (!prevFilterComponent) {
       render(this.#filterComponent, this.#filtersContainer);
       return;
     }
 
-    replace(this.#filterComponent, previousFilterComponent);
-    remove(previousFilterComponent);
+    replace(this.#filterComponent, prevFilterComponent);
+    remove(prevFilterComponent);
   }
 
   #handleModelChange = () => {
@@ -49,7 +48,7 @@ export default class FilterPresenter {
   };
 
   #handleFilterTypeChange = (filterType) => {
-    if (this.#filterModel.filter === filterType) {
+    if (this.#filterModel.filter === filterType || this.filters.some((item) => item.type === filterType && item.points.length === 0)) {
       return;
     }
     this.#filterModel.setFilter(UpdateType.MAJOR, filterType);

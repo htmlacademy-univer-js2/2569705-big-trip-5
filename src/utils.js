@@ -1,28 +1,19 @@
 import dayjs from 'dayjs';
-import { offersMock } from './mock/offers-mock';
-import { destinationsMock } from './mock/destinations-mock';
+
 
 function getRandomArrayElement(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
 function formatDate(date, format) {
   return date ? dayjs(date).format(format) : '';
 }
 
-function getDestinationById(id, destinations) {
-  return destinations.find((destination) => destination.id === id);
-}
+const getDestinationById = (destinations, id) => destinations.find((item) => item.id === id);
 
-function getOffersByType(point) {
-  const offerGroup = offersMock.find((group) => group.type === point.type);
-
-  if (!offerGroup) {
-    return `Группа предложений для типа "${point.type}" не найдена`;
-  }
-
-  return offerGroup.offers.map((offer) => offer.id);
+function getOffersByType(offers, type) {
+  const offerGroup = offers.find((group) => group.type === type);
+  return offerGroup ? offerGroup.offers : [];
 }
 
 function getDuration(dateFrom, dateTo, format = 'number'){
@@ -97,21 +88,65 @@ function sortByField(points, field, order) {
   });
 }
 
-const getOfferById = (id) => {
-  for (const offerGroup of offersMock) {
-    const foundOffer = offerGroup.offers.find((offer) => offer.id === id);
-    if (foundOffer) {
-      return foundOffer;
+const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
+const sort = {
+  [SortTypes[0]]: (points) => sortByField(points, 'dateFrom', 'desc'),
+  [SortTypes[2]]: (points) => {
+    const pointsWithDuration = points.map((point) => ({
+      ...point,
+      duration: dayjs(point.dateTo).diff(dayjs(point.dateFrom)),
+    }));
+    return sortByField(pointsWithDuration, 'duration', 'desc');
+  },
+  [SortTypes[3]]: (points) => sortByField(points, 'basePrice', 'desc'),
+};
+
+const getOfferById = (offers, id) => {
+  for (let i = 0; i < offers.length; i++) {
+    if (offers[i].id === id) {
+      return offers[i];
     }
   }
-  return `Предложение с id=${id} не найдено`;
 };
 
 const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 const capitalizeWord = (word) => word.charAt(0).toUpperCase() + word.slice(1);
 
-const getAllDestinations = () => destinationsMock;
-const getAllOffers = () => offersMock;
+const getDayAndMonth = (date) => dayjs(date).format('D MMM');
+const getRouteInfo = (points, destinations, offers) => {
+  if (!points || points.length === 0) {
+    return {
+      dates: ['', ''],
+      route: '',
+      price: 0,
+    };
+  }
+
+  const dates = [
+    getDayAndMonth(points[points.length - 1].dateFrom),
+    getDayAndMonth(points[0].dateTo),
+  ];
+
+  const routeNames = points.map((point) =>
+    getDestinationById(destinations, point.destination).name
+  );
+  const route =
+    routeNames.length < 4
+      ? routeNames.reverse().join(' &mdash; ')
+      : `${routeNames[routeNames.length - 1]} &mdash; ... &mdash; ${routeNames[0]}`;
+
+  const price = points.reduce((total, point) => {
+    const basePrice = Number(point.basePrice);
+    const offersType = getOffersByType(offers, point.type);
+    const additionalPrice = point.offers.reduce(
+      (sum, offer) => sum + Number(getOfferById(offersType, offer).price),
+      0
+    );
+    return total + basePrice + additionalPrice;
+  }, 0);
+
+  return { dates, route, price };
+};
 
 export {getRandomArrayElement, formatDate, getDestinationById, getOffersByType, getDuration,
-  isPointFuture, isPointPast, isPointPresent, updatePointById, sortByField, getAllDestinations, getAllOffers, getOfferById, getFullDate, capitalizeWord};
+  isPointFuture, isPointPast, isPointPresent, updatePointById, sortByField, getOfferById, getFullDate, capitalizeWord, sort, getRouteInfo};

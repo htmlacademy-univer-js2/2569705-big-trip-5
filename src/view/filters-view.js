@@ -7,7 +7,7 @@ function createFiltersTemplate(filterItems, currentFilterType) {
               <form class="trip-filters" action="#" method="get">
                 ${filterItems.map((filter) => `<div class="trip-filters__filter">
                   <input id="filter-${filter.type}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter.type}"
-                  ${filter.count === 0 ? 'disabled' : ''} ${filter.type === currentFilterType ? 'checked' : ''}>
+                  ${filter.points.length === 0 ? 'disabled' : ''} ${filter.type === currentFilterType ? 'checked' : ''}>
                   <label class="trip-filters__filter-label" for="filter-${filter.type}" data-filter=${filter.type}>
                     ${filter.type.charAt(0).toUpperCase() + filter.type.slice(1)}
                   </label>
@@ -20,18 +20,23 @@ function createFiltersTemplate(filterItems, currentFilterType) {
 
 export default class Filters extends AbstractView {
   #filters = null;
-  #currentFilterType = 'everything';
-  #handleFilterTypeChange = null;
+  #currentFilterType = null;
+  #onFilterTypeChange = null;
 
-  constructor({filters, currentFilterType, onFilterTypeChange }) {
+  constructor({ filters, currentFilterType, onFilterTypeChange }) {
     super();
     this.#filters = filters;
     this.#currentFilterType = currentFilterType;
-    this.#handleFilterTypeChange = onFilterTypeChange;
+    this.#onFilterTypeChange = onFilterTypeChange;
 
-    this.element.addEventListener('click', (evt) => {
-      evt.preventDefault();
-      this.#handleFilterTypeChange(evt.target.dataset.filter);
+    this.element.addEventListener('change', (evt) => {
+      if (!evt || !evt.target) {
+        return;
+      }
+      if (evt.target.tagName === 'INPUT') {
+        evt.preventDefault();
+        this.#onFilterTypeChange(evt.target.value);
+      }
     });
   }
 
