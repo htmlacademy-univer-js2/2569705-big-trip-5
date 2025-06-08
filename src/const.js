@@ -27,7 +27,6 @@ const modeType = {
 };
 
 const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
-const EventTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
 const NEW_POINT = {
   type: 'flight',
@@ -54,7 +53,7 @@ const UpdateType = {
   INIT: 'INIT'
 };
 
-const NoPointMessages = {
+const NoEventsMessages = {
   EVERYTHING: 'Click New Event to create your first point',
   PAST: 'There are no past events now',
   PRESENT: 'There are no present events now',
@@ -73,5 +72,9 @@ const TimeLimit = {
   UPPER_LIMIT: 800
 };
 
+const ServerConfig = {
+  END_POINT: 'https://24.objects.htmlacademy.pro/big-trip',
+  AUTHORIZATION: 'Basic 742398hjydtuk6'
+};
 
-export { Formats, filter, SortTypes, EventTypes, NEW_POINT, UserAction, UpdateType, NoPointMessages, FilterType, Method, TimeLimit, modeType };
+export { Formats, filter, SortTypes, NEW_POINT, UserAction, UpdateType, NoEventsMessages, FilterType, Method, TimeLimit, modeType, ServerConfig };

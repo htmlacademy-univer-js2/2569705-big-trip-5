@@ -1,8 +1,7 @@
 import dayjs from 'dayjs';
 
-
-function getRandomArrayElement(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function isEscapeKey(evt) {
+  return evt.key === 'Escape';
 }
 
 function formatDate(date, format) {
@@ -49,10 +48,6 @@ function isPointFuture(point) {
 
 function isPointPast(point) {
   return dayjs().isAfter(dayjs(point.dateTo));
-}
-
-function updatePointById(points, updatedPoint) {
-  return points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
 }
 
 function sortByField(points, field, order) {
@@ -148,5 +143,6 @@ const getRouteInfo = (points, destinations, offers) => {
   return { dates, route, price };
 };
 
-export {getRandomArrayElement, formatDate, getDestinationById, getOffersByType, getDuration,
-  isPointFuture, isPointPast, isPointPresent, updatePointById, sortByField, getOfferById, getFullDate, capitalizeWord, sort, getRouteInfo};
+export {formatDate, getDestinationById, getOffersByType, getDuration,
+  isPointFuture, isPointPast, isPointPresent, sortByField, getOfferById, getFullDate, capitalizeWord, sort, getRouteInfo, isEscapeKey};
+

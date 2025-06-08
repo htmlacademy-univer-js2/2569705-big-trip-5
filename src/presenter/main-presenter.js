@@ -8,7 +8,7 @@ import PointCreationPresenter from './create-point-presenter.js';
 import RoutePointList from '../view/route-points-list-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import LoadingView from '../view/loading-view.js';
-import ErrorView from '../view/error-view.js';
+import LoadingErrorView from '../view/loading-error-view.js';
 
 export default class Presenter {
   #pointListComponent = null;
@@ -23,7 +23,7 @@ export default class Presenter {
   #pointCreationPresenter = null;
   #pointPresenters = new Map();
   #loadingComponent = new LoadingView();
-  #errorComponent = new ErrorView();
+  #errorComponent = new LoadingErrorView();
   #isLoading = true;
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,

@@ -1,8 +1,8 @@
 import RoutePoint from '../view/route-point-view.js';
-import FormEditing from '../view/editing-form-view.js';
+import EditingForm from '../view/editing-form-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { UserAction, UpdateType, modeType } from '../const.js';
-import { getOffersByType } from '../utils.js';
+import { getOffersByType, isEscapeKey } from '../utils.js';
 
 export default class RoutePointPresenter {
   #container = null;
@@ -96,9 +96,9 @@ export default class RoutePointPresenter {
     this.#dataPoint = updatedPoint;
   };
 
-  #handleEscapeKey = (event) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
+  #handleEscapeKey = (evt) => {
+    if (isEscapeKey(evt)) {
+      evt.preventDefault();
       this.#editFormView.reset(this.#dataPoint);
       this.#switchToViewMode();
       document.removeEventListener('keydown', this.#handleEscapeKey);
@@ -116,7 +116,7 @@ export default class RoutePointPresenter {
   }
 
   #createEditFormView() {
-    return new FormEditing({
+    return new EditingForm({
       point: this.#dataPoint,
       destinations: this.#destinationsData,
       offers: this.#offersData,
