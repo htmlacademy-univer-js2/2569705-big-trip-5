@@ -144,7 +144,6 @@ function createFormEditingTemplate(point, destinations, allOffers, typeOffers) {
 }
 
 export default class FormEditing extends AbstractStatefulView {
-  #point = null;
   #offers = null;
   #destinations = [];
   #handleFormSubmit = null;
@@ -156,9 +155,7 @@ export default class FormEditing extends AbstractStatefulView {
 
   constructor({ point, offers, destinations, onFormSubmit, onFormReset = null, typeOffers, onDeleteClick }) {
     super();
-    this.#point = point;
     this._setState(FormEditing.parsePointToState(point, point.destination, typeOffers));
-    console.log(this.#point)
     this.#offers = offers;
     this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
@@ -194,15 +191,7 @@ export default class FormEditing extends AbstractStatefulView {
     try {
       this.#validateForm();
       await this.#handleFormSubmit(this._state);
-      // this.updateElement({
-      //   isSaving: false,
-      //   isDisabled: false
-      // });
     } catch (error) {
-      // this.updateElement({
-      //   isSaving: false,
-      //   isDisabled: false
-      // });
       showNotification(error.message, 'error', document.body);
     }
   };
@@ -255,7 +244,7 @@ export default class FormEditing extends AbstractStatefulView {
   };
 
   #handlePriceChange = (evt) => {
-     evt.preventDefault();
+    evt.preventDefault();
     evt.target.value = Number(evt.target.value.replace(/[^0-9]/g, ''));
     this._setState({
       basePrice: Number(evt.target.value)

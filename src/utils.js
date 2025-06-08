@@ -1,11 +1,9 @@
 import dayjs from 'dayjs';
-//import { SortTypes } from './const';
-const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
+
 
 function getRandomArrayElement(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
 
 function formatDate(date, format) {
   return date ? dayjs(date).format(format) : '';
@@ -90,15 +88,14 @@ function sortByField(points, field, order) {
   });
 }
 
+const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
 const sort = {
   [SortTypes[0]]: (points) => sortByField(points, 'dateFrom', 'desc'),
   [SortTypes[2]]: (points) => {
-    // Добавляем поле "duration" для каждой точки
     const pointsWithDuration = points.map((point) => ({
       ...point,
       duration: dayjs(point.dateTo).diff(dayjs(point.dateFrom)),
     }));
-    // Сортируем по продолжительности
     return sortByField(pointsWithDuration, 'duration', 'desc');
   },
   [SortTypes[3]]: (points) => sortByField(points, 'basePrice', 'desc'),
@@ -125,13 +122,11 @@ const getRouteInfo = (points, destinations, offers) => {
     };
   }
 
-  // 1. Даты маршрута
   const dates = [
     getDayAndMonth(points[points.length - 1].dateFrom),
     getDayAndMonth(points[0].dateTo),
   ];
 
-  // 2. Маршрут
   const routeNames = points.map((point) =>
     getDestinationById(destinations, point.destination).name
   );
@@ -140,7 +135,6 @@ const getRouteInfo = (points, destinations, offers) => {
       ? routeNames.reverse().join(' &mdash; ')
       : `${routeNames[routeNames.length - 1]} &mdash; ... &mdash; ${routeNames[0]}`;
 
-  // 3. Цена маршрута
   const price = points.reduce((total, point) => {
     const basePrice = Number(point.basePrice);
     const offersType = getOffersByType(offers, point.type);

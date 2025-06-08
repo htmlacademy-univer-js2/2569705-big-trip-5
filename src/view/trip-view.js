@@ -16,7 +16,7 @@ function createTripInfoTemplate(points, destinations, offers) {
           </section>`;
 }
 
-export default class TripInfoView extends AbstractView {
+export default class TripView extends AbstractView {
   #points = null;
   #pointsModel = null;
 

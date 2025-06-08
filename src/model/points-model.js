@@ -32,7 +32,7 @@ export default class PointsModel extends Observable {
 
     try {
       const response = await this.#pointsApiService.updatePoint(update);
-      const updatedPoint = this.#adaptToClient(response);
+      const updatedPoint = this.#adaptPoint(response);
       this.#points = this.#points.map((point) =>
         point.id === updatedPoint.id ? { ...point, ...updatedPoint } : point
       );
@@ -45,11 +45,7 @@ export default class PointsModel extends Observable {
   async addPoint(updateType, point) {
     try {
       const response = await this.#pointsApiService.addPoint(point);
-      const update = this.#adaptToClient(response);
-      // const newPoint = {
-      //   ...update,
-      //   id: crypto.randomUUID()
-      // };
+      const update = this.#adaptPoint(response);
       this.#points = [...this.#points, update];
       this._notify(updateType, update);
     } catch {
@@ -75,7 +71,7 @@ export default class PointsModel extends Observable {
     let isLoadingFailed = false;
     try {
       const points = await this.#pointsApiService.points;
-      this.#points = points.map((point) => this.#adaptToClient(point));
+      this.#points = points.map((point) => this.#adaptPoint(point));
       this.#allDestinations = await this.#pointsApiService.destinations;
       this.#allOffers = await this.#pointsApiService.offers;
       this.#isLoading = false;
@@ -90,7 +86,7 @@ export default class PointsModel extends Observable {
     this._notify(UpdateType.INIT, { isLoadingFailed });
   }
 
-  #adaptToClient = (point) => {
+  #adaptPoint = (point) => {
     const adaptedPoint = {
       ...point,
       basePrice: point['base_price'],

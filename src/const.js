@@ -21,6 +21,11 @@ const filter = {
   [FilterType.PAST]: (points) => points.filter((point) => isPointPast(point))
 };
 
+const modeType = {
+  VIEW: 'VIEW',
+  EDIT: 'EDIT'
+};
+
 const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
 const EventTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
@@ -69,4 +74,4 @@ const TimeLimit = {
 };
 
 
-export { Formats, filter, SortTypes, EventTypes, NEW_POINT, UserAction, UpdateType, NoPointMessages, FilterType, Method, TimeLimit };
+export { Formats, filter, SortTypes, EventTypes, NEW_POINT, UserAction, UpdateType, NoPointMessages, FilterType, Method, TimeLimit, modeType };

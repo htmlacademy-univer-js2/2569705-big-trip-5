@@ -27,20 +27,20 @@ export default class FilterPresenter {
 
   init() {
     const filtersData = this.filters;
-    const previousFilterComponent = this.#filterComponent;
+    const prevFilterComponent = this.#filterComponent;
     this.#filterComponent = new Filters({
       filters: filtersData,
       activeFilterType: this.#filterModel.filter,
       onFilterTypeChange: this.#handleFilterTypeChange
     });
 
-    if (!previousFilterComponent) {
+    if (!prevFilterComponent) {
       render(this.#filterComponent, this.#filtersContainer);
       return;
     }
 
-    replace(this.#filterComponent, previousFilterComponent);
-    remove(previousFilterComponent);
+    replace(this.#filterComponent, prevFilterComponent);
+    remove(prevFilterComponent);
   }
 
   #handleModelChange = () => {

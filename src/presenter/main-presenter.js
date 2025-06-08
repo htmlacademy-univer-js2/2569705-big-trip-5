@@ -22,9 +22,6 @@ export default class Presenter {
   #currentSortType = null;
   #pointCreationPresenter = null;
   #pointPresenters = new Map();
-  #isCreating = false;
-  #addButton = null;
-  #boundHandleAddButtonClick = null;
   #loadingComponent = new LoadingView();
   #errorComponent = new ErrorView();
   #isLoading = true;
@@ -42,7 +39,6 @@ export default class Presenter {
     this.#pointsModel.addObserver(this.#handleModelChange);
     this.#filterModel.addObserver(this.#handleModelChange);
     this.#handleUserAction = this.#handleUserAction.bind(this);
-    this.#addButton = document.querySelector('.trip-main__event-add-btn');
 
     this.#pointCreationPresenter = new PointCreationPresenter({
       filterModel: this.#filterModel,
@@ -58,16 +54,14 @@ export default class Presenter {
   #handleUserAction = async (actionType, updateType, update) => {
     const presenter = this.#pointPresenters.get(update.id);
 
-    // Сохраняем текущий обработчик из объекта handlers
     const handlers = {
       [UserAction.UPDATE_POINT]: async () => {
         presenter.setSaving();
         await this.#pointsModel.updatePoint(updateType, update);
       },
       [UserAction.ADD_POINT]: async () => {
-        presenter?.setSaving(); // Добавляем проверку на существование
+        presenter?.setSaving();
         await this.#pointsModel.addPoint(updateType, update);
-        this.#isCreating = false;
       },
       [UserAction.DELETE_POINT]: async () => {
         presenter.setDeleting();
@@ -77,9 +71,8 @@ export default class Presenter {
 
     try {
       this.#uiBlocker.block();
-      await handlers[actionType]?.(); // Ждем выполнения асинхронного обработчика
+      await handlers[actionType]?.();
     } catch (error) {
-      // Обработка ошибок из целевого примера
       if (actionType === UserAction.ADD_POINT) {
         this.#pointCreationPresenter.setAborting();
       } else {
@@ -104,10 +97,8 @@ export default class Presenter {
         this.#renderRoutePoints();
       },
       [UpdateType.MAJOR]: () => {
-        if (!this.#isCreating) {
-          this.#clearPointsList();
-          this.#renderRoutePoints(true);
-        }
+        this.#clearPointsList();
+        this.#renderRoutePoints(true);
       },
       [UpdateType.DELETE]: () => {
         const presenter = this.#pointPresenters.get(update.id);
@@ -115,7 +106,7 @@ export default class Presenter {
           presenter.destroy();
           this.#pointPresenters.delete(update.id);
         }
-        if (this.points.length === 0 && !this.#isCreating) {
+        if (this.points.length === 0) {
           this.#renderEmptyState();
         } else {
           this.#renderRoutePoints();
@@ -141,9 +132,6 @@ export default class Presenter {
   #renderRoutePoints = (isFilterChanged = false) => {
     if (this.#isLoading) {
       this.#renderLoading();
-      return;
-    }
-    if (this.#isCreating) {
       return;
     }
     this.#clearPointsList();
@@ -187,9 +175,6 @@ export default class Presenter {
   }
 
   #renderEmptyState() {
-    if (this.#isCreating) {
-      return;
-    }
     if (this.#sortComponent !== null) {
       remove(this.#sortComponent);
     }
@@ -273,38 +258,6 @@ export default class Presenter {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
     this.#pointCreationPresenter.destroy();
-  }
-
-  createPoint() {
-    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this.#currentSortType = SortTypes[0];
-    this.#handleModeChange();
-    if (this.#emptyPointListComponent) {
-      remove(this.#emptyPointListComponent);
-      this.#emptyPointListComponent = null;
-    }
-    if (this.#sortComponent) {
-      remove(this.#sortComponent);
-      this.#sortComponent = null;
-    }
-    this.#isCreating = true;
-    if (this.#pointCreationPresenter) {
-      this.#pointCreationPresenter.destroy();
-      this.#pointCreationPresenter = null;
-    }
-    this.#pointCreationPresenter = new PointCreationPresenter({
-      filterModel: this.#filterModel,
-      pointListComponent: this.#pointListComponent,
-      point: NEW_POINT,
-      typeOffers: getOffersByType(NEW_POINT),
-      favoriteHandler: this.#handleUserAction,
-      modeSwitchHandler: this.#handleModeChange.bind(this)
-    });
-
-    const emptyMessages = this.#tripEventsSection.querySelectorAll('.trip-events__msg');
-    emptyMessages.forEach((msg) => msg.remove());
-    render(this.#pointListComponent, this.#tripEventsSection);
-    this.#pointCreationPresenter.init();
   }
 
   #renderLoading() {

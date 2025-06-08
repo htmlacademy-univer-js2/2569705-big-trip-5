@@ -1,7 +1,7 @@
 import RoutePoint from '../view/route-point-view.js';
 import FormEditing from '../view/editing-form-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const.js';
+import { UserAction, UpdateType, modeType } from '../const.js';
 import { getOffersByType } from '../utils.js';
 
 export default class RoutePointPresenter {
@@ -44,14 +44,12 @@ export default class RoutePointPresenter {
     const prevPointView = this.#pointView;
     const prevEditForm = this.#editFormView;
 
-    this.#dataPoint = point; // Обновляем данные
+    this.#dataPoint = point;
     this.#typeOffers = getOffersByType(this.#offersData, point.type);
 
-    // Полное пересоздание представлений
     this.#pointView = this.#createPointView();
     this.#editFormView = this.#createEditFormView();
 
-    // // Замена старых элементов новыми
     if (prevPointView === null || prevEditForm === null) {
       render(this.#pointView, this.#container.element);
       return;
@@ -70,7 +68,7 @@ export default class RoutePointPresenter {
   }
 
   resetView() {
-    if (this.#currentMode !== 'VIEW') {
+    if (this.#currentMode !== modeType.VIEW) {
       this.#editFormView.reset(this.#dataPoint);
       this.#switchToViewMode();
     }
@@ -80,13 +78,13 @@ export default class RoutePointPresenter {
     this.#onModeSwitch();
     replace(this.#editFormView, this.#pointView);
     document.addEventListener('keydown', this.#handleEscapeKey);
-    this.#currentMode = 'EDIT';
+    this.#currentMode = modeType.EDIT;
   };
 
   #switchToViewMode() {
     replace(this.#pointView, this.#editFormView);
     document.removeEventListener('keydown', this.#handleEscapeKey);
-    this.#currentMode = 'VIEW';
+    this.#currentMode = modeType.VIEW;
   }
 
   #updateFavoriteStatus = () => {
@@ -94,7 +92,7 @@ export default class RoutePointPresenter {
       ...this.#dataPoint,
       isFavorite: this.#dataPoint.isFavorite
     };
-    this.#onFavoriteToggle(updatedPoint); // Передаем обновленные данные
+    this.#onFavoriteToggle(updatedPoint);
     this.#dataPoint = updatedPoint;
   };
 
@@ -130,18 +128,14 @@ export default class RoutePointPresenter {
   }
 
   #handleDeleteButtonClick = (point) => {
-    // this.#switchToViewMode();
     this.#onAction(UserAction.DELETE_POINT, UpdateType.DELETE, point);
   };
 
   #handleFormSubmit = async (updatedPoint) => {
-    // Сохраняем ссылки на элементы ДО асинхронной операции
     const pointView = this.#pointView;
     const editFormView = this.#editFormView;
 
     const e = await this.#onAction(UserAction.UPDATE_POINT, UpdateType.PATCH, updatedPoint);
-
-    // Проверяем, существуют ли ещё элементы
     if (!e && pointView && editFormView) {
       this.#switchToViewMode();
     }
@@ -153,7 +147,7 @@ export default class RoutePointPresenter {
   };
 
   setAborting() {
-    if (this.#currentMode === 'VIEW') {
+    if (this.#currentMode === modeType.VIEW) {
       this.#pointView.shake();
       return;
     }
@@ -162,13 +156,13 @@ export default class RoutePointPresenter {
   }
 
   setSaving() {
-    if (this.#currentMode === 'EDIT') {
+    if (this.#currentMode === modeType.EDIT) {
       this.#editFormView.updateElement({ isDisabled: true, isSaving: true });
     }
   }
 
   setDeleting() {
-    if (this.#currentMode === 'EDIT') {
+    if (this.#currentMode === modeType.EDIT) {
       this.#editFormView.updateElement({ isDisabled: true, isDeleting: true });
     }
   }

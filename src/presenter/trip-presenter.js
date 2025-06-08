@@ -1,10 +1,10 @@
 import { remove, render, RenderPosition } from '../framework/render';
-import TripInfoView from '../view/trip-view';
+import TripView from '../view/trip-view';
 
-export default class TripInfoPresenter {
+export default class TripPresenter {
   #container = null;
   #pointsModel = null;
-  #tripInfoComponent = null;
+  #tripComponent = null;
 
   constructor({ container, pointsModel }) {
     this.#container = container;
@@ -13,9 +13,9 @@ export default class TripInfoPresenter {
   }
 
   init() {
-    remove(this.#tripInfoComponent);
-    this.#tripInfoComponent = new TripInfoView({ pointsModel: this.#pointsModel });
-    render(this.#tripInfoComponent, this.#container, RenderPosition.AFTERBEGIN);
+    remove(this.#tripComponent);
+    this.#tripComponent = new TripView({ pointsModel: this.#pointsModel });
+    render(this.#tripComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
 
   #handleModelChange = () => {
