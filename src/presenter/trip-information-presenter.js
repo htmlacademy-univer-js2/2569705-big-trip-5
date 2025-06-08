@@ -1,5 +1,5 @@
 import { remove, render, RenderPosition } from '../framework/render';
-import TripView from '../view/trip-view';
+import TripInformation from '../view/trip-information-view';
 
 export default class TripPresenter {
   #container = null;
@@ -9,16 +9,16 @@ export default class TripPresenter {
   constructor({ container, pointsModel }) {
     this.#container = container;
     this.#pointsModel = pointsModel;
-    this.#pointsModel.addObserver(this.#handleModelChange);
+    this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
 
   init() {
     remove(this.#tripComponent);
-    this.#tripComponent = new TripView({ pointsModel: this.#pointsModel });
+    this.#tripComponent = new TripInformation({ pointsModel: this.#pointsModel });
     render(this.#tripComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
 
-  #handleModelChange = () => {
+  #modelChangeHandler = () => {
     this.init();
   };
 }

@@ -1,5 +1,5 @@
 import { render, remove, replace } from '../framework/render.js';
-import { FilterType, UpdateType, filter } from '../const.js';
+import { FILTER, FilterType, UpdateType } from '../const.js';
 import Filters from '../view/filters-view.js';
 
 export default class FilterPresenter {
@@ -12,8 +12,8 @@ export default class FilterPresenter {
     this.#filtersContainer = filtersContainer;
     this.#filterModel = filterModel;
     this.#pointsModel = pointsModel;
-    this.#filterModel.addObserver(this.#handleModelChange);
-    this.#pointsModel.addObserver(this.#handleModelChange);
+    this.#filterModel.addObserver(this.#modelChangeHandler);
+    this.#pointsModel.addObserver(this.#modelChangeHandler);
   }
 
   get filters() {
@@ -21,7 +21,7 @@ export default class FilterPresenter {
 
     return Object.values(FilterType).map((type) => ({
       type,
-      points: filter[type](points)
+      points: FILTER[type](points)
     }));
   }
 
@@ -31,7 +31,7 @@ export default class FilterPresenter {
     this.#filterComponent = new Filters({
       filters: filtersData,
       activeFilterType: this.#filterModel.filter,
-      onFilterTypeChange: this.#handleFilterTypeChange
+      filterTypeChangeHandler: this.#filterTypeChangeHandler.bind()
     });
 
     if (!prevFilterComponent) {
@@ -43,11 +43,11 @@ export default class FilterPresenter {
     remove(prevFilterComponent);
   }
 
-  #handleModelChange = () => {
+  #modelChangeHandler = () => {
     this.init();
   };
 
-  #handleFilterTypeChange = (filterType) => {
+  #filterTypeChangeHandler = (filterType) => {
     if (this.#filterModel.filter === filterType || this.filters.some((item) => item.type === filterType && item.points.length === 0)) {
       return;
     }

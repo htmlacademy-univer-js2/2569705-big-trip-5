@@ -7,6 +7,7 @@ export default class PointsModel extends Observable {
   #allOffers = [];
   #pointsApiService = null;
   #isLoading = true;
+
   constructor({ pointsApiService }) {
     super();
     this.#pointsApiService = pointsApiService;
@@ -49,7 +50,7 @@ export default class PointsModel extends Observable {
       this.#points = [...this.#points, update];
       this._notify(updateType, update);
     } catch {
-      throw new Error('Can\'t add unexiscting point');
+      throw new Error('Can\'t add point');
     }
   }
 

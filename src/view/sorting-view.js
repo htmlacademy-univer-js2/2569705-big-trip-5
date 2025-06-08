@@ -1,18 +1,22 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { SortTypes } from '../const.js';
+import { SORT_TYPES } from '../const.js';
 
 export default class Sorting extends AbstractView {
   #currentSorting = null;
   #sortingChangeHandler = null;
 
-  constructor({ sortingType, onSortingChange }) {
+  constructor({ sortingType, sortingChangeHandler }) {
     super();
     this.#currentSorting = sortingType;
-    this.#sortingChangeHandler = onSortingChange;
-    this.element.addEventListener('change', this.#handleSortingChange);
+    this.#sortingChangeHandler = sortingChangeHandler;
+    this.element.addEventListener('change', this.#sortChangeHandler);
   }
 
-  #handleSortingChange = (event) => {
+  get template() {
+    return createSortingTemplate(this.#currentSorting);
+  }
+
+  #sortChangeHandler = (event) => {
     event.preventDefault();
     const selectedSortingType = event.target.dataset.sortType;
 
@@ -20,16 +24,12 @@ export default class Sorting extends AbstractView {
       this.#sortingChangeHandler(selectedSortingType);
     }
   };
-
-  get template() {
-    return createSortingTemplate(this.#currentSorting);
-  }
 }
 
 function createSortingTemplate(currentSorting) {
   return `
     <form class="trip-events__trip-sort trip-sort" action="#" method="get">
-      ${SortTypes.map((type) => `
+      ${SORT_TYPES.map((type) => `
         <div class="trip-sort__item trip-sort__item--${type}">
           <input
             id="sort-${type}"

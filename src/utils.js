@@ -1,5 +1,54 @@
 import dayjs from 'dayjs';
 
+const getDestinationById = (destinations, id) => destinations.find((item) => item.id === id);
+
+const getOfferById = (offers, id) => {
+  for (let i = 0; i < offers.length; i++) {
+    if (offers[i].id === id) {
+      return offers[i];
+    }
+  }
+};
+
+const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
+const capitalizeWord = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+
+const getDayAndMonth = (date) => dayjs(date).format('D MMM');
+const getRouteInfo = (points, destinations, offers) => {
+  if (!points || points.length === 0) {
+    return {
+      dates: ['', ''],
+      route: '',
+      price: 0,
+    };
+  }
+
+  const dates = [
+    getDayAndMonth(points[points.length - 1].dateFrom),
+    getDayAndMonth(points[0].dateTo),
+  ];
+
+  const routeNames = points.map((point) =>
+    getDestinationById(destinations, point.destination).name
+  );
+  const route =
+    routeNames.length < 4
+      ? routeNames.reverse().join(' &mdash; ')
+      : `${routeNames[routeNames.length - 1]} &mdash; ... &mdash; ${routeNames[0]}`;
+
+  const price = points.reduce((total, point) => {
+    const basePrice = Number(point.basePrice);
+    const offersType = getOffersByType(offers, point.type);
+    const additionalPrice = point.offers.reduce(
+      (sum, offer) => sum + Number(getOfferById(offersType, offer).price),
+      0
+    );
+    return total + basePrice + additionalPrice;
+  }, 0);
+
+  return { dates, route, price };
+};
+
 function isEscapeKey(evt) {
   return evt.key === 'Escape';
 }
@@ -7,8 +56,6 @@ function isEscapeKey(evt) {
 function formatDate(date, format) {
   return date ? dayjs(date).format(format) : '';
 }
-
-const getDestinationById = (destinations, id) => destinations.find((item) => item.id === id);
 
 function getOffersByType(offers, type) {
   const offerGroup = offers.find((group) => group.type === type);
@@ -83,66 +130,7 @@ function sortByField(points, field, order) {
   });
 }
 
-const SortTypes = ['day', 'event', 'time', 'price', 'offers'];
-const sort = {
-  [SortTypes[0]]: (points) => sortByField(points, 'dateFrom', 'desc'),
-  [SortTypes[2]]: (points) => {
-    const pointsWithDuration = points.map((point) => ({
-      ...point,
-      duration: dayjs(point.dateTo).diff(dayjs(point.dateFrom)),
-    }));
-    return sortByField(pointsWithDuration, 'duration', 'desc');
-  },
-  [SortTypes[3]]: (points) => sortByField(points, 'basePrice', 'desc'),
-};
-
-const getOfferById = (offers, id) => {
-  for (let i = 0; i < offers.length; i++) {
-    if (offers[i].id === id) {
-      return offers[i];
-    }
-  }
-};
-
-const getFullDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
-const capitalizeWord = (word) => word.charAt(0).toUpperCase() + word.slice(1);
-
-const getDayAndMonth = (date) => dayjs(date).format('D MMM');
-const getRouteInfo = (points, destinations, offers) => {
-  if (!points || points.length === 0) {
-    return {
-      dates: ['', ''],
-      route: '',
-      price: 0,
-    };
-  }
-
-  const dates = [
-    getDayAndMonth(points[points.length - 1].dateFrom),
-    getDayAndMonth(points[0].dateTo),
-  ];
-
-  const routeNames = points.map((point) =>
-    getDestinationById(destinations, point.destination).name
-  );
-  const route =
-    routeNames.length < 4
-      ? routeNames.reverse().join(' &mdash; ')
-      : `${routeNames[routeNames.length - 1]} &mdash; ... &mdash; ${routeNames[0]}`;
-
-  const price = points.reduce((total, point) => {
-    const basePrice = Number(point.basePrice);
-    const offersType = getOffersByType(offers, point.type);
-    const additionalPrice = point.offers.reduce(
-      (sum, offer) => sum + Number(getOfferById(offersType, offer).price),
-      0
-    );
-    return total + basePrice + additionalPrice;
-  }, 0);
-
-  return { dates, route, price };
-};
-
 export {formatDate, getDestinationById, getOffersByType, getDuration,
-  isPointFuture, isPointPast, isPointPresent, sortByField, getOfferById, getFullDate, capitalizeWord, sort, getRouteInfo, isEscapeKey};
+  isPointFuture, isPointPast, isPointPresent, sortByField, getOfferById,
+  getFullDate, capitalizeWord, getRouteInfo, isEscapeKey};
 
