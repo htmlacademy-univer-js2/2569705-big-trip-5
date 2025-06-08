@@ -1,7 +1,7 @@
-import FormEditing from '../view/editing-form-view.js';
+import EditingForm from '../view/editing-form-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
-import { getOffersByType } from '../utils.js';
+import { getOffersByType, isEscapeKey } from '../utils.js';
 
 export default class PointCreationPresenter {
   #pointListComponent = null;
@@ -33,7 +33,7 @@ export default class PointCreationPresenter {
       remove(this.#pointEditComponent);
     }
 
-    this.#pointEditComponent = new FormEditing({
+    this.#pointEditComponent = new EditingForm({
       point: this.#point,
       typeOffers: getOffersByType(this.#pointsModel.offers, this.#point.type),
       offers: this.#pointsModel.offers,
@@ -71,7 +71,7 @@ export default class PointCreationPresenter {
   };
 
   #onEscKeydown = (evt) => {
-    if (evt.key === 'Escape') {
+    if (isEscapeKey(evt)) {
       evt.preventDefault();
       this.destroy();
       document.removeEventListener('keydown', this.#onEscKeydown);
