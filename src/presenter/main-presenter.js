@@ -199,10 +199,10 @@ export default class Presenter {
       container: this.#pointListComponent,
       destinations: this.destinations,
       offers: this.offers,
-      favoriteHandler: (p) => {
+      favoriteHandler: (pointWithFavorite) => {
         this.#userActionHandler(UserAction.UPDATE_POINT, UpdateType.PATCH, {
-          ...p,
-          isFavorite: !p.isFavorite
+          ...pointWithFavorite,
+          isFavorite: !pointWithFavorite.isFavorite
         });
       },
       modeSwitchHandler: this.#modeChangeHandler.bind(this),
